@@ -205,92 +205,61 @@ router.get('/view/:id', function (req, res) {
         
         let retchunk = function (range, size, mime, buffer) {
             res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
-            res.type(mime);
-            res.status(206).send(buffer);
+            res.type(mime).status(206).send(buffer);
+            //res.status(206);
+            //res.send(buffer);
+        }
+        
+        let returnData = function (file, length, start, range, size) {
+            fs.open(file, 'r', function (err, fd) {
+                if (err) {
+                    console.log("Error opening file: " + err);
+                    res.send(500);
+                }
+                let buffer = new Buffer(length);
+                fs.read(fd, buffer, 0, length, start, function (err, bytesRead, buffer) {
+                    if (err) {
+                        console.log("Error reading file: " + err);
+                        res.send(500);
+                    }
+                    
+                    res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
+                    res.type(mime.lookup(file)).status(206).send(buffer);
+                    fs.close(fd);
+                    //retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
+                });
+            });
         }
 
         if (data !== null) {
             let stats = fs.statSync(data.path);
-            console.log("range = " + req.get('Range'));
             if (typeof req.get('Range') === 'undefined') {
                 retrange(stats.size);
-                
             }
             else {                              
-                let range = req.get('Range');
-                let sp = range.replace('bytes=', '').split('-');
-                console.log("splito rezultatas = " + sp);
-                let buffer = '';
+                let sp = req.get('Range').replace('bytes=', '').split('-');
                 let returnrange = '';
                 //TODO: LIMIT RANGE TO SOME AMOUNT!
                 
                 if (sp[0] === '') {
                     // void - number
-                    if (parseInt(sp[1]) > stats['size'] || parseInt(sp[1]) < 0) {
+                    if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) <= 0) {
                         retrange(stats.size);
                     }
-                    //read number of bytes (stats['size'] - parseInt(sp[1]), stats['size'])
-                    returnrange = stats['size'] - parseInt(sp[1]) + '-' + parseInt(stats.size) - 1;
-                    //let buf = fs.createReadStream(data.path, { start: stats['size'] - parseInt(sp[1]), end: parseInt(stats.size) });
-                    /*let fd = fs.openSync(data.path, 'r');
-                    fs.read(fd, buffer, 0, (stats['size'] - (stats['size'] - parseInt(sp[1]))), (stats['size'] - parseInt(sp[1])), function (err, bytesRead, buffer) {
-                        if (err) {
-                            console.log(err);
-                            res.send(500);
-                        }
-                        console.log("buffer length = " + buffer.length);
-                        console.log("baitai = " + bytesRead);
-                        fs.close(fd);
-                        retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
-                    });*/
-                    fs.open(data.path, 'r', function (err, fd) {
-                        if (err) {
-                            console.log("viduj eroras" + err);
-                            res.send(500);
-                        }
-                        let len = parseInt(sp[1]);
-                        let buffer = new Buffer(len);
-                        fs.read(fd, buffer, 0, len, parseInt(stats.size - parseInt(sp[1])), function (err, bytesRead, buffer) {
-                            if (err) {
-                                console.log("viduj eroras2" + err);
-                                res.send(500);
-                            }
-                            console.log("baitai = " + bytesRead);
-                            fs.close(fd);
-                            retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
-                        });
-                    });
-                    //buf.pipe(buffer);
-                    //console.log("buffer length: " + buffer.length);
+                    else {
+                        returnrange = (stats.size - parseInt(sp[1])) + '-' + (parseInt(stats.size) - 1);
+                        returnData(data.path, parseInt(sp[1]), parseInt(stats.size - parseInt(sp[1])), returnrange, stats.size);
+                    }
                 }
                 else if (sp[1] === '') {
                     // number - void
                     if (parseInt(sp[0]) > stats.size || parseInt(sp[0]) < 0) {
                         retrange(stats.size);
                     }
-                    //read number of bytes (parseInt(sp[0]), stats['size'])
-                    returnrange = sp[0] + '-' + parseInt(stats.size) - 1;
-                    //let buf = fs.createReadStream(data.path, { start: parseInt(sp[0]), end: parseInt(stats.size) });
-                   // buf.pipe(buffer);
-                    //console.log("buffer length: " + buffer.length);
-
-                    fs.open(data.path, 'r', function (err, fd) {
-                        if (err) {
-                            console.log("viduj eroras" + err);
-                            res.send(500);
-                        }
-                        let len = parseInt(parseInt(stats.size) - parseInt(sp[0]));
-                        let buffer = new Buffer(len);
-                        fs.read(fd, buffer, 0, len, parseInt(sp[0]), function (err, bytesRead, buffer) {
-                            if (err) {
-                                console.log("viduj eroras2" + err);
-                                res.send(500);
-                            }
-                            console.log("baitai = " + bytesRead);
-                            fs.close(fd);
-                            retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
-                        });
-                    });
+                    else {
+                        returnrange = parseInt(sp[0]) + '-' + (parseInt(stats.size) - 1);
+                        returnData(data.path, parseInt(parseInt(stats.size) - parseInt(sp[0])), parseInt(sp[0]), returnrange, stats.size);
+                    }
                 }
                 else {
                     // number - number
@@ -300,39 +269,12 @@ router.get('/view/:id', function (req, res) {
                     else if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) < 0) {
                         retrange(stats.size);
                     }
-                    
-                    //read range (parseInt(sp[0]), parseInt(sp[1]))
-                    returnrange = sp[0] + '-' + sp[1];
-                    fs.open(data.path, 'r', function (err, fd) {
-                        if (err) {
-                            console.log("viduj eroras" + err);
-                            res.send(500);
-                        }
-                        let len = parseInt(parseInt(sp[1]) - parseInt(sp[0]) + 1);
-                        let buffer = new Buffer(len);
-                        fs.read(fd, buffer, 0, len, parseInt(sp[0]), function (err, bytesRead, buffer) {
-                            if (err) {
-                                console.log("viduj eroras2" + err);
-                                res.send(500);
-                            }
-                            console.log("baitai = " + bytesRead);
-                            fs.close(fd);
-                            retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
-                        });
-                    });
+                    else {
+                        returnrange = sp[0] + '-' + sp[1];
+                        returnData(data.path, parseInt(parseInt(sp[1]) - parseInt(sp[0]) + 1), parseInt(sp[0]), returnrange, stats.size);
+                    }
                 }
-                /*res.set({ 'Content-Range': 'bytes ' + returnrange + '/' + stats.size });
-                res.type(mime.lookup(data.path));
-                res.status(206).send(buffer);*/
-                //TODO: Check if range is good !
             }
-        
-        
-
-        
-        //Content - Type: video/mp4
-        //Content - Range: bytes 0-1023/2048
-        //Content-Length: 1024
         }
         else {
             res.sendStatus(404);
