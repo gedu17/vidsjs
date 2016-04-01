@@ -1,6 +1,7 @@
 ﻿'use strict';
 var models = require('../models');
 var express = require('express');
+var jade = require('jade');
 var router = express.Router();
 var fs = require('fs');
 var pathJS = require('path');
@@ -8,6 +9,9 @@ var Sequelize = require('sequelize');
 var filetypes = Array();
 var items = require('../items');
 var mime = require('mime');
+
+//var ul = jade.compile('myul');
+//var li = jade.compile('myli');
 
 function checkType(ext, ft) {
     let found = false;
@@ -98,30 +102,39 @@ function getDirListing(level, times, folder) {
                 }
             }
             if (folder !== null && !foldersExist) {
-                data = data.concat("|" + leftPadding(times) + "#" + folder + "\n");
+                //data = data.concat("|" + leftPadding(times) + "#" + folder + "\n");
+                //data = data.concat(ul({padding: leftPadding(times) }));
+                data = data.concat('<li><span style="font-weight: bold">' + folder + '</span><ul>\n');
             }
             for (let i in items) {
                 if (items[i].type === 0) {
                     promarr.push(getDirListing(items[i].id, times + 1, items[i].name));
                 }
                 else {
-                    data = data.concat("|" + leftPadding(times) + "-" + items[i].name + "\n");
+                    //data = data.concat("|" + leftPadding(times) + "-" + items[i].name + "\n");
+                    //console.log(li({ padding: leftPadding(times), name: items[i].name }) + " // " + items[i].name);
+                    //data = data.concat(li({ padding: leftPadding(times), name: items[i].name }));
+                    data = data.concat('<li><a href="/view/' + items[i].id + '">' + items[i].name + '</a></li>\n');
                 }
             }
             
             if (promarr.length > 0) {
                 let final = '';
                 if (folder !== null) {
-                    final = "|" + leftPadding(times) + "#" + folder + "\n";
+                    //final = "|" + leftPadding(times) + "#" + folder + "\n";
+                    //final = ul({ padding: leftPadding(times) });
+                    final = '<li><span style="font-weight: bold">' + folder + '</span>\n<ul>\n';
                 }
                 Promise.all(promarr).then(function (dat) {
                     for (let i in dat) {
                         final = final.concat(dat[i]);
                     }
-                    resolve(final.concat(data));
+                    final = final.concat(data).concat('</ul>\n</li>\n');
+                    resolve(final);
                 });
             }
             else {
+                data = data.concat('</ul>\n</li>\n');
                 resolve(data);
             }
             
@@ -172,7 +185,7 @@ function getPath() {
 function leftPadding(times) {
     let ret = '';
     for (let i = 0; i < times; i++) {
-        ret = ret.concat(' ');
+        ret = ret.concat('    ');
     }
     return ret;
 }
@@ -183,9 +196,12 @@ function fixExtension(ext) {
 
 /* GET home page. */
 router.get('/', function (req, res) {
-    console.log(req);
+    //console.log(req);
     //checkUser()
-    res.render('index', { title: 'VidsJS', content: 'ziurim ka cia gaunam xD' });
+    //res.render('index', { title: 'VidsJS', content: 'ziurim ka cia gaunam xD' });
+    getDirListing(0, 1, null).then(function (cont) {
+        res.render('index', { title: 'Express', content: cont });
+    });
 });
 
 router.get('/api/dirlist', function (req, res) {
@@ -194,23 +210,35 @@ router.get('/api/dirlist', function (req, res) {
     });
 });
 
+/*router.head('/view/:id', function (req, res) {
+    console.log("head request on id = " + req.params.id);
+    models.items.find({ where: { id: req.params.id } }).then(function (data) {
+        if (data !== null) {
+            
+        }
+        else {
+            res.sendStatus(404);
+        }
+    });
+});*/
+
 router.get('/view/:id', function (req, res) {
     models.items.find({ where: { id: req.params.id } }).then(function (data) {
-        //TODO: FIND OUT MAX BUFFER SIZE AND LIMIT BY IT ! ( OR USE MORE BUFFERS ))) )
-        //TODO: patikrint ar daliniai grazinimai grazina ka reikia !
-        let retrange = function (size) {
-            res.set({ 'Content-Range': 'bytes */' + size });
-            res.sendStatus(406);
-        }
+        //TODO: FIND OUT MAX BUFFER SIZE AND LIMIT BY IT ! ( OR USE MORE BUFFERS ))) ) // 1gb xdd
+        let stats = fs.statSync(data.path);
+        let returnrange = '';
         
-        let retchunk = function (range, size, mime, buffer) {
-            res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
-            res.type(mime).status(206).send(buffer);
-            //res.status(206);
-            //res.send(buffer);
-        }
-        
+
         let returnData = function (file, length, start, range, size) {
+
+            let crs = fs.createReadStream(file, { flags: "r", start: start, end: start + length });
+            res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
+            res.set({ 'Content-Length': length});
+            res.type(mime.lookup(file)).status(206);
+            //Content-Disposition
+            //.send(buffer);
+            crs.pipe(res);
+            /*console.log("LENGTH = " + length);
             fs.open(file, 'r', function (err, fd) {
                 if (err) {
                     console.log("Error opening file: " + err);
@@ -228,17 +256,43 @@ router.get('/view/:id', function (req, res) {
                     fs.close(fd);
                     //retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
                 });
-            });
+            });*/
         }
+        
+
+        let retrange = function (size) {
+            res.set({ 'Content-Range': 'bytes */' + size });
+            res.sendStatus(416);
+        }
+        
+        /*let retchunk = function (range, size, mime, buffer) {
+            res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
+            res.type(mime).status(206).send(buffer);
+            //res.status(206);
+            //res.send(buffer);
+        }*/
+        
+        
 
         if (data !== null) {
-            let stats = fs.statSync(data.path);
+            //let stats = fs.statSync(data.path);
             if (typeof req.get('Range') === 'undefined') {
-                retrange(stats.size);
+                //10ish mb
+                let sizeconst = 10000000;
+                if (stats.size > sizeconst) {
+                    returnrange = '0-' + (sizeconst - 1);
+                    returnData(data.path, sizeconst, 0, returnrange, stats.size);
+                }
+                else {
+                    returnrange = '0-' + (stats.size - 1);
+                    returnData(data.path, stats.size, 0, returnrange, stats.size);
+                }
+               
+                //retrange(stats.size);
             }
             else {                              
                 let sp = req.get('Range').replace('bytes=', '').split('-');
-                let returnrange = '';
+                
                 //TODO: LIMIT RANGE TO SOME AMOUNT!
                 
                 if (sp[0] === '') {
