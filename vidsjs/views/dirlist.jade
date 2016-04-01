@@ -1,0 +1,13 @@
+﻿mixin printList(obj)
+    each item in obj.items
+        li= item.name
+        if item.type == 0
+            ul
+                +printList(item)
+        
+
+extends layout
+
+block content
+    ul
+        +printList(content)

@@ -20,6 +20,67 @@ function checkType(ext, ft) {
     return found;
 }
 
+function compareDirListing2(a, b) {
+    if (a.type === 1 && b.type === 1) {
+        return a.name.localeCompare(b.name);
+    } else if (a.type === 1 && b.type === 0 || a.type === 0 && b.type === 1) {
+        return 1;
+    } else {
+        return a.name.localeCompare(b.name);
+    }
+}
+/*
+
+    if (typeof a.length === 'undefined' && typeof b.length === 'undefined') {
+        //console.log("   returninam 0");
+        return a.name.localeCompare(b.name);
+        //return 0;
+    } else if (typeof a.length === 'undefined' && typeof b.length !== 'undefined') {
+        //console.log("   returninam -1 // 1");
+        return 1;//-1;
+    } else if (typeof a.length !== 'undefined' && typeof b.length === 'undefined') {
+        //console.log("   returninam 1");
+        return -1;
+    } else {
+        //console.log(a[0].name + " // " + b[0].name + " = " + a[0].name.localeCompare(b[0].name));
+        //console.log("   returninam " + a[0].name.localeCompare(b[0].name));
+
+        return a[0].name.localeCompare(b[0].name);
+    }
+}*/
+
+function compareDirListing(a, b) {
+    /*if (typeof a.name === 'undefined') {
+        console.log("comparing " + a[0].name + "(" + a.length + ") with ");
+    }
+    else {
+        console.log("comparing " + a.name + "(" + a.length + ") with ");
+    }
+    if (typeof b.name === 'undefined') {
+        console.log(b[0].name + "(" + b.length + ")");
+    }
+    else {
+        console.log(b.name + "(" + b.length + ")");
+    }*/
+    //console.log("comparing " + a.name + "(" +a.length +")" + " with " + b.name + "(" + b.length +")");
+    if (typeof a.length === 'undefined' && typeof b.length === 'undefined') {
+        //console.log("   returninam 0");
+        return a.name.localeCompare(b.name);
+        //return 0;
+    } else if (typeof a.length === 'undefined' && typeof b.length !== 'undefined') {
+        //console.log("   returninam -1 // 1");
+        return 1;//-1;
+    } else if (typeof a.length !== 'undefined' && typeof b.length === 'undefined') {
+        //console.log("   returninam 1");
+        return -1;
+    } else {
+        //console.log(a[0].name + " // " + b[0].name + " = " + a[0].name.localeCompare(b[0].name));
+        //console.log("   returninam " + a[0].name.localeCompare(b[0].name));
+
+        return a[0].name.localeCompare(b[0].name);
+    }
+}
+
 function deleteMissingItems(cl) {
     return new Promise(function (resolve, reject) {
         if (cl.items.length > 0) {
@@ -86,43 +147,35 @@ function readDir(path, ft, level, cl) {
 }
 
 function getDirListing(level, times, folder) {
-    let data = '';
+    let itemarr = {name:"parentDir", type: 0, items: Array()};// = Array();
     return new Promise(function (resolve, reject) {
         models.items.findAll({ where: { parent: level }, order: 'type ASC, name ASC' }).then(function (items) {
             let promarr = Array();
-            let foldersExist = false;
-            for (let i in items) {
-                if (items[i].type === 0) {
-                    foldersExist = true;
-                    break;
-                }
+
+            if (folder !== null) {
+                itemarr = { name: folder, type: 0, items: Array() };
             }
-            if (folder !== null && !foldersExist) {
-                data = data.concat("|" + leftPadding(times) + "#" + folder + "\n");
-            }
+
             for (let i in items) {
                 if (items[i].type === 0) {
                     promarr.push(getDirListing(items[i].id, times + 1, items[i].name));
                 }
                 else {
-                    data = data.concat("|" + leftPadding(times) + "-" + items[i].name + "\n");
+                    itemarr.items.push({ name: items[i].name, type: 1});
                 }
             }
             
             if (promarr.length > 0) {
-                let final = '';
-                if (folder !== null) {
-                    final = "|" + leftPadding(times) + "#" + folder + "\n";
-                }
                 Promise.all(promarr).then(function (dat) {
                     for (let i in dat) {
-                        final = final.concat(dat[i]);
+                        dat[i].items.sort(compareDirListing2);
+                        itemarr.items.push(dat[i]);
                     }
-                    resolve(final.concat(data));
+                    resolve(itemarr);
                 });
             }
             else {
-                resolve(data);
+                resolve(itemarr);
             }
             
             
@@ -190,7 +243,11 @@ router.get('/', function (req, res) {
 
 router.get('/api/dirlist', function (req, res) {
     getDirListing(0, 1, null).then(function (cont) {
-        res.render('index', { title: 'Express', content: cont });
+
+        cont.items.sort(compareDirListing2);
+        res.render('dirlist', { title: 'Express', content: cont });
+    }).catch(function (err) {
+        console.log(err);
     });
 });
 
