@@ -110,7 +110,7 @@ function getDirListing(level, times, folder) {
                     promarr.push(getDirListing(items[i].id, times + 1, items[i].name));
                 }
                 else {
-                    itemarr.items.push({ name: items[i].name, type: 1});
+                    itemarr.items.push({ name: items[i].name, type: 1, url: '/view/'+items[i].id});
                 }
             }
             
@@ -189,7 +189,11 @@ router.get('/', function (req, res) {
     //checkUser()
     //res.render('index', { title: 'VidsJS', content: 'ziurim ka cia gaunam xD' });
     getDirListing(0, 1, null).then(function (cont) {
-        res.render('index', { title: 'Express', content: cont });
+        
+        cont.items.sort(compareDirListing2);
+        res.render('dirlist', { content: cont });
+    }).catch(function (err) {
+        console.log(err);
     });
 });
 
@@ -197,23 +201,11 @@ router.get('/api/dirlist', function (req, res) {
     getDirListing(0, 1, null).then(function (cont) {
 
         cont.items.sort(compareDirListing2);
-        res.render('dirlist', { title: 'Express', content: cont });
+        res.render('dirlist', { content: cont });
     }).catch(function (err) {
         console.log(err);
     });
 });
-
-/*router.head('/view/:id', function (req, res) {
-    console.log("head request on id = " + req.params.id);
-    models.items.find({ where: { id: req.params.id } }).then(function (data) {
-        if (data !== null) {
-            
-        }
-        else {
-            res.sendStatus(404);
-        }
-    });
-});*/
 
 router.get('/view/:id', function (req, res) {
     models.items.find({ where: { id: req.params.id } }).then(function (data) {
@@ -229,43 +221,14 @@ router.get('/view/:id', function (req, res) {
             res.set({ 'Content-Length': length});
             res.type(mime.lookup(file)).status(206);
             //Content-Disposition
-            //.send(buffer);
             crs.pipe(res);
-            /*console.log("LENGTH = " + length);
-            fs.open(file, 'r', function (err, fd) {
-                if (err) {
-                    console.log("Error opening file: " + err);
-                    res.send(500);
-                }
-                let buffer = new Buffer(length);
-                fs.read(fd, buffer, 0, length, start, function (err, bytesRead, buffer) {
-                    if (err) {
-                        console.log("Error reading file: " + err);
-                        res.send(500);
-                    }
-                    
-                    res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
-                    res.type(mime.lookup(file)).status(206).send(buffer);
-                    fs.close(fd);
-                    //retchunk(returnrange, stats.size, mime.lookup(data.path), buffer);
-                });
-            });*/
         }
         
 
         let retrange = function (size) {
             res.set({ 'Content-Range': 'bytes */' + size });
             res.sendStatus(416);
-        }
-        
-        /*let retchunk = function (range, size, mime, buffer) {
-            res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
-            res.type(mime).status(206).send(buffer);
-            //res.status(206);
-            //res.send(buffer);
-        }*/
-        
-        
+        }      
 
         if (data !== null) {
             //let stats = fs.statSync(data.path);
@@ -281,7 +244,6 @@ router.get('/view/:id', function (req, res) {
                     returnData(data.path, stats.size, 0, returnrange, stats.size);
                 }
                
-                //retrange(stats.size);
             }
             else {                              
                 let sp = req.get('Range').replace('bytes=', '').split('-');

@@ -1,9 +1,13 @@
 ﻿mixin printList(obj)
     each item in obj.items
-        li= item.name
+        
         if item.type == 0
+            li= item.name
             ul
                 +printList(item)
+        else
+            li
+                a(href='#{item.url}')= item.name
         
 
 extends layout
