@@ -10,9 +10,6 @@ var filetypes = Array();
 var items = require('../items');
 var mime = require('mime');
 
-//var ul = jade.compile('myul');
-//var li = jade.compile('myli');
-
 function checkType(ext, ft) {
     let found = false;
     for (let i in ft) {
@@ -22,6 +19,16 @@ function checkType(ext, ft) {
         }
     }
     return found;
+}
+
+function compareDirListing2(a, b) {
+    if (a.type === 1 && b.type === 1) {
+        return a.name.localeCompare(b.name);
+    } else if (a.type === 1 && b.type === 0 || a.type === 0 && b.type === 1) {
+        return 1;
+    } else {
+        return a.name.localeCompare(b.name);
+    }
 }
 
 function deleteMissingItems(cl) {
@@ -90,52 +97,34 @@ function readDir(path, ft, level, cl) {
 }
 
 function getDirListing(level, times, folder) {
-    let data = '';
+    let itemarr = {name:"parentDir", type: 0, items: Array()};
     return new Promise(function (resolve, reject) {
         models.items.findAll({ where: { parent: level }, order: 'type ASC, name ASC' }).then(function (items) {
             let promarr = Array();
-            let foldersExist = false;
-            for (let i in items) {
-                if (items[i].type === 0) {
-                    foldersExist = true;
-                    break;
-                }
+            if (folder !== null) {
+                itemarr = { name: folder, type: 0, items: Array() };
             }
-            if (folder !== null && !foldersExist) {
-                //data = data.concat("|" + leftPadding(times) + "#" + folder + "\n");
-                //data = data.concat(ul({padding: leftPadding(times) }));
-                data = data.concat('<li><span style="font-weight: bold">' + folder + '</span><ul>\n');
-            }
+
             for (let i in items) {
                 if (items[i].type === 0) {
                     promarr.push(getDirListing(items[i].id, times + 1, items[i].name));
                 }
                 else {
-                    //data = data.concat("|" + leftPadding(times) + "-" + items[i].name + "\n");
-                    //console.log(li({ padding: leftPadding(times), name: items[i].name }) + " // " + items[i].name);
-                    //data = data.concat(li({ padding: leftPadding(times), name: items[i].name }));
-                    data = data.concat('<li><a href="/view/' + items[i].id + '">' + items[i].name + '</a></li>\n');
+                    itemarr.items.push({ name: items[i].name, type: 1});
                 }
             }
             
             if (promarr.length > 0) {
-                let final = '';
-                if (folder !== null) {
-                    //final = "|" + leftPadding(times) + "#" + folder + "\n";
-                    //final = ul({ padding: leftPadding(times) });
-                    final = '<li><span style="font-weight: bold">' + folder + '</span>\n<ul>\n';
-                }
                 Promise.all(promarr).then(function (dat) {
                     for (let i in dat) {
-                        final = final.concat(dat[i]);
+                        dat[i].items.sort(compareDirListing2);
+                        itemarr.items.push(dat[i]);
                     }
-                    final = final.concat(data).concat('</ul>\n</li>\n');
-                    resolve(final);
+                    resolve(itemarr);
                 });
             }
             else {
-                data = data.concat('</ul>\n</li>\n');
-                resolve(data);
+                resolve(itemarr);
             }
             
             
@@ -206,7 +195,11 @@ router.get('/', function (req, res) {
 
 router.get('/api/dirlist', function (req, res) {
     getDirListing(0, 1, null).then(function (cont) {
-        res.render('index', { title: 'Express', content: cont });
+
+        cont.items.sort(compareDirListing2);
+        res.render('dirlist', { title: 'Express', content: cont });
+    }).catch(function (err) {
+        console.log(err);
     });
 });
 
