@@ -31,13 +31,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
-    <Compile Include="items.js" />
+    <Compile Include="modules\dirlist.js" />
+    <Compile Include="modules\dirscan.js" />
+    <Compile Include="modules\index.js" />
+    <Compile Include="modules\items.js" />
     <Compile Include="migrations\20160325150256-create-items.js" />
     <Compile Include="migrations\20160325150422-create-settings.js" />
     <Compile Include="models\index.js" />
+    <Compile Include="modules\view.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
     <Compile Include="bin\www" />
+    <Compile Include="modules\utils.js" />
     <Content Include="package.json" />
     <Content Include="public\stylesheets\style.styl" />
     <Content Include="README.md" />
@@ -51,6 +56,7 @@
     <Folder Include="bin\" />
     <Folder Include="migrations\" />
     <Folder Include="models\" />
+    <Folder Include="modules\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\javascripts\" />
