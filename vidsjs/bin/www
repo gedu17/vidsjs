@@ -20,4 +20,4 @@ models.sequelize.sync().then(function () {
 
 function normalizePort(val) { return val; }
 function onError(error) { console.log(error);/* ... */ }
-function onListening() { console.log("HEEEEEJ"); }
+function onListening() {  }

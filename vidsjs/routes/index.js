@@ -183,6 +183,19 @@ function fixExtension(ext) {
     return pathJS.extname(ext).substring(1, ext.length);
 }
 
+function getUserDefinedName(id) {
+    //TODO: IMPLEMENT
+    return new Promise(function (resolve, reject) {
+        models.items.find({ where: { id: id } }).then(function (data) {
+            resolve(pathJS.basename(data.path));
+        }).catch(function (err) {
+            reject(err);
+        });
+    });
+    
+    
+}
+
 /* GET home page. */
 router.get('/', function (req, res) {
     //console.log(req);
@@ -214,14 +227,18 @@ router.get('/view/:id', function (req, res) {
         let returnrange = '';
         
 
-        let returnData = function (file, length, start, range, size) {
+        let returnData = function (file, length, start, range, size, id) {
 
             let crs = fs.createReadStream(file, { flags: "r", start: start, end: start + length });
             res.set({ 'Content-Range': 'bytes ' + range + '/' + size });
-            res.set({ 'Content-Length': length});
-            res.type(mime.lookup(file)).status(206);
-            //Content-Disposition
-            crs.pipe(res);
+            res.set({ 'Content-Length': length });
+            getUserDefinedName(id).then(function (name) {
+                res.set({ 'Content-Disposition': 'inline; filename="' + name + '"' });
+                res.type(mime.lookup(file)).status(206);
+                crs.pipe(res);
+            }).catch(function (err) {
+                console.log("returndata err: " + err);
+            });
         }
         
 
@@ -237,11 +254,11 @@ router.get('/view/:id', function (req, res) {
                 let sizeconst = 10000000;
                 if (stats.size > sizeconst) {
                     returnrange = '0-' + (sizeconst - 1);
-                    returnData(data.path, sizeconst, 0, returnrange, stats.size);
+                    returnData(data.path, sizeconst, 0, returnrange, stats.size, data.id);
                 }
                 else {
                     returnrange = '0-' + (stats.size - 1);
-                    returnData(data.path, stats.size, 0, returnrange, stats.size);
+                    returnData(data.path, stats.size, 0, returnrange, stats.size, data.id);
                 }
                
             }
@@ -257,7 +274,7 @@ router.get('/view/:id', function (req, res) {
                     }
                     else {
                         returnrange = (stats.size - parseInt(sp[1])) + '-' + (parseInt(stats.size) - 1);
-                        returnData(data.path, parseInt(sp[1]), parseInt(stats.size - parseInt(sp[1])), returnrange, stats.size);
+                        returnData(data.path, parseInt(sp[1]), parseInt(stats.size - parseInt(sp[1])), returnrange, stats.size, data.id);
                     }
                 }
                 else if (sp[1] === '') {
@@ -267,7 +284,7 @@ router.get('/view/:id', function (req, res) {
                     }
                     else {
                         returnrange = parseInt(sp[0]) + '-' + (parseInt(stats.size) - 1);
-                        returnData(data.path, parseInt(parseInt(stats.size) - parseInt(sp[0])), parseInt(sp[0]), returnrange, stats.size);
+                        returnData(data.path, parseInt(parseInt(stats.size) - parseInt(sp[0])), parseInt(sp[0]), returnrange, stats.size, data.id);
                     }
                 }
                 else {
@@ -280,7 +297,7 @@ router.get('/view/:id', function (req, res) {
                     }
                     else {
                         returnrange = sp[0] + '-' + sp[1];
-                        returnData(data.path, parseInt(parseInt(sp[1]) - parseInt(sp[0]) + 1), parseInt(sp[0]), returnrange, stats.size);
+                        returnData(data.path, parseInt(parseInt(sp[1]) - parseInt(sp[0]) + 1), parseInt(sp[0]), returnrange, stats.size, data.id);
                     }
                 }
             }
