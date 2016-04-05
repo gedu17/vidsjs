@@ -38,76 +38,79 @@ function returnRange(res, size) {
 */
 function view(res, id, Range) {
     models.items.find({ where: { id: id } }).then(function (data) {
-        fs.stat(data.path, function (err, stats) {
-            if (err) {
-                res.sendStatus(404);
-                return false;
-            }
+        if(data !== null) {
+            fs.stat(data.path, function (err, stats) {
+                if (err) {
+                    res.sendStatus(404);
+                    return false;
+                }
 
-            let returnrange = '';
-            if (data !== null) {
-                if (typeof Range === 'undefined') {
-                    models.settings.find({ where: { name: 'packetsize' } }).then(function (psize) {
-                        let dbsize = parseInt(psize);
-                        if (stats.size > dbsize) {
-                            returnrange = '0-' + (dbsize - 1);
-                            returnData(res, data.path, dbsize, 0, returnrange, stats.size);
-                        }
-                        else {
-                            returnrange = '0-' + (stats.size - 1);
-                            returnData(res, data.path, stats.size, 0, returnrange, stats.size);
-                        }
-                    });
-                } else {
-                    let sp = Range.replace('bytes=', '').split('-');
-                    //TODO: LIMIT RANGE TO SOME AMOUNT!
-                    // void - number
-                    if (sp[0] === '') {
-                        if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) <= 0) {
-                            returnRange(stats.size);
-                        } else {
-                            returnrange = (stats.size - parseInt(sp[1])) + '-'
-                                + (parseInt(stats.size) - 1);
-                            returnData(res, data.path, parseInt(sp[1]),
-                                parseInt(stats.size - parseInt(sp[1])), returnrange, stats.size);
-                        }
-                        // number - void
-                    } else if (sp[1] === '') {
-                        if (parseInt(sp[0]) > stats.size || parseInt(sp[0]) < 0) {
-                            returnRange(stats.size);
-                        }
-                        else {
-                            returnrange = parseInt(sp[0]) + '-' + (parseInt(stats.size) - 1);
-                            returnData(res, data.path, parseInt(parseInt(stats.size) -
-                                parseInt(sp[0])), parseInt(sp[0]), returnrange, stats.size);
-                        }
-                        // number - number
+                let returnrange = '';
+                if (data !== null) {
+                    if (typeof Range === 'undefined') {
+                        models.settings.find({ where: { name: 'packetsize' } }).then(function (psize) {
+                            let dbsize = parseInt(psize);
+                            if (stats.size > dbsize) {
+                                returnrange = '0-' + (dbsize - 1);
+                                returnData(res, data.path, dbsize, 0, returnrange, stats.size);
+                            }
+                            else {
+                                returnrange = '0-' + (stats.size - 1);
+                                returnData(res, data.path, stats.size, 0, returnrange, stats.size);
+                            }
+                        });
                     } else {
-                        if (parseInt(sp[0]) > stats.size || parseInt(sp[0]) < 0) {
-                            returnRange(stats.size);
-                        }
-                        else if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) < 0) {
-                            returnRange(stats.size);
-                        }
-                        else {
-                            returnrange = sp[0] + '-' + sp[1];
-                            returnData(res, data.path, parseInt(parseInt(sp[1]) -
-                                parseInt(sp[0]) + 1), parseInt(sp[0]), returnrange, stats.size);
+                        let sp = Range.replace('bytes=', '').split('-');
+                        //TODO: LIMIT RANGE TO SOME AMOUNT!
+                        // void - number
+                        if (sp[0] === '') {
+                            if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) <= 0) {
+                                returnRange(stats.size);
+                            } else {
+                                returnrange = (stats.size - parseInt(sp[1])) + '-'
+                                    + (parseInt(stats.size) - 1);
+                                returnData(res, data.path, parseInt(sp[1]),
+                                    parseInt(stats.size - parseInt(sp[1])), returnrange, stats.size);
+                            }
+                            // number - void
+                        } else if (sp[1] === '') {
+                            if (parseInt(sp[0]) > stats.size || parseInt(sp[0]) < 0) {
+                                returnRange(stats.size);
+                            }
+                            else {
+                                returnrange = parseInt(sp[0]) + '-' + (parseInt(stats.size) - 1);
+                                returnData(res, data.path, parseInt(parseInt(stats.size) -
+                                    parseInt(sp[0])), parseInt(sp[0]), returnrange, stats.size);
+                            }
+                            // number - number
+                        } else {
+                            if (parseInt(sp[0]) > stats.size || parseInt(sp[0]) < 0) {
+                                returnRange(stats.size);
+                            }
+                            else if (parseInt(sp[1]) > stats.size || parseInt(sp[1]) < 0) {
+                                returnRange(stats.size);
+                            }
+                            else {
+                                returnrange = sp[0] + '-' + sp[1];
+                                returnData(res, data.path, parseInt(parseInt(sp[1]) -
+                                    parseInt(sp[0]) + 1), parseInt(sp[0]), returnrange, stats.size);
+                            }
                         }
                     }
                 }
-            }
-            else {
-                res.sendStatus(404);
-            }
-        });/*.catch(function (err) {
-            console.log("err = " + err);
-            res.sendStatus(500);
-        });*/
+                else {
+                    res.sendStatus(404);
+                }
+            });/*.catch(function (err) {
+                console.log("err = " + err);
+                res.sendStatus(500);
+            });*/
+        }
     }).catch(function (err) {
         console.log("err = " + err);
         res.sendStatus(500);
     });
+        
 }
 
 exports.view = view;
