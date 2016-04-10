@@ -58,8 +58,10 @@ function fixExtension(file) {
 function compareDirListing(a, b) {
     if (a.type === 1 && b.type === 1) {
         return a.name.localeCompare(b.name);
-    } else if (a.type === 1 && b.type === 0 || a.type === 0 && b.type === 1) {
+    } else if (a.type === 1 && b.type === 0) {
         return 1;
+    } else if (a.type === 0 && b.type === 1) {
+        return -1;
     } else {
         return a.name.localeCompare(b.name);
     }
@@ -75,9 +77,36 @@ function generateViewUrl(id) {
     return '/view/' + id;
 }
 
+
+/*
+    * Returns link to flag item as seen
+    * id = id of the item in database
+*/
+//FIXME: implement
+function generateSeenUrl(id) {
+    return '/seen/' + id;
+}
+
+/*
+    * Returns boolean wether item is flagged as seen by user
+    * id = id of the item in database
+*/
+//FIXME: use data field !
+function isSeen(id) {
+    return new Promise(function (resolve, reject) {
+        models.users_data.find({ where: { user: 1, item: id } }).then(function (par) {
+            if (par === null) {
+                reject(false);
+            }
+            resolve(true);
+        });
+    });
+}
+
 exports.getTypes = getTypes;
 exports.getPath = getPath;
 exports.fixExtension = fixExtension;
 exports.compareDirListing = compareDirListing;
 exports.generateViewUrl = generateViewUrl;
-//module.exports = [getTypes, getPath, fixExtension, compareDirListing, generateViewUrl];
+exports.generateSeenUrl = generateSeenUrl;
+exports.isSeen = isSeen;

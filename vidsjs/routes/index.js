@@ -22,8 +22,23 @@ function getUserDefinedName(id) {
 /* GET home page. */
 router.get('/', function (req, res) {
     mods.dirlist.getDirListing(0, null).then(function (cont) {
-        cont.items.sort(mods.utils.compareDirListing);
-        res.render('dirlist', { content: cont });
+        //FIXME: BAD SORTING ???
+        let a = new Promise(function (resolve, reject) {
+            /*console.log("before sort: ");// + cont.items);
+            for (let i in cont.items) {
+                console.log(cont.items[i]);
+            }*/
+            cont.items.sort(mods.utils.compareDirListing);
+            /*console.log("after sort:  ");// + cont.items);
+            for (let i in cont.items) {
+                console.log(cont.items[i]);
+            }*/
+            resolve(true);
+        });
+        a.then(function (tmp) {
+            res.render('dirlist', { content: cont });
+        });
+        
     }).catch(function (err) {
         console.log("route / " + err);
     });
@@ -40,6 +55,17 @@ router.get('/api/dirlist', function (req, res) {
 
 router.get('/view/:id', function (req, res) {
     mods.view.view(res, req.params.id, req.get('Range'));
+});
+
+router.get('/seen/:id', function (req, res) {
+    mods.seen.seen(res, req.params.id);
+    
+});
+
+/* debuging some strange requests */
+router.get('/view', function (req, res) {
+    console.log(req);
+    res.sendStatus(404);
 });
 
 router.get('/scanDirs', function (req, res) {

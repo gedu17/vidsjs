@@ -1,5 +1,20 @@
 #VidsJS
 
+##0.3
+
+###Back-End
+- [x] create user table in sqlite
+- [x] create user_data table (save video data (customised name, seen, etc)) in sqlite
+- [x] fixed bug in removing found videos after dirscan
+- [x] ability to flag item as seen
+- [x] view method to return partial content
+- [x] refactored code to modules
+- [x] fixed bug in compareDirListing
+
+###Front-End
+- [x] ability to flag as seen
+- [x] physical video list
+
 ##0.2
 
 ###Back-End

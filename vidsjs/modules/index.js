@@ -5,3 +5,4 @@ exports.dirscan = require('./dirscan');
 exports.items = require('./items');
 exports.utils = require('./utils');
 exports.view = require('./view');
+exports.seen = require('./seen');

@@ -2,12 +2,20 @@
     each item in obj.items
         
         if item.type == 0
-            li= item.name
+            li.noBullets
+                div.floatLeft !{item.name}
+                div.floatRight
+                    a(href='#{item.seen}')= 'Seen'
+                div.clear
             ul
-                +printList(item)
+                +printList(item) 
         else
-            li
-                a(href='#{item.url}')= item.name
+            li.noBullets
+                div.floatLeft
+                    a(href='#{item.url}')= item.name 
+                div.floatRight
+                    a(href='#{item.seen}')= 'Seen'
+                div.clear
         
 
 extends layout

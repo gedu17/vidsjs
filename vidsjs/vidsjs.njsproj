@@ -38,6 +38,7 @@
     <Compile Include="migrations\20160325150256-create-items.js" />
     <Compile Include="migrations\20160325150422-create-settings.js" />
     <Compile Include="models\index.js" />
+    <Compile Include="modules\seen.js" />
     <Compile Include="modules\view.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
@@ -50,7 +51,6 @@
     <Content Include="views\index.jade" />
     <Content Include="views\layout.jade" />
     <Content Include="views\error.jade" />
-    <Content Include="views\vidlist.jade" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin\" />
