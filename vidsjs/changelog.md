@@ -1,5 +1,11 @@
 #VidsJS
 
+##0.3.1
+
+###Back-End
+- [ ] Add functionality to add app as an os service
+- [x] Fix range bug in view
+
 ##0.3
 
 ###Back-End

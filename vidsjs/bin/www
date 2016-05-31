@@ -2,22 +2,45 @@
 var debug = require('debug')('vidsjs');
 var app = require('../app');
 var http = require('http');
-var models = require("../models");
-var port = normalizePort(process.env.PORT || '3000');
+var models = require('../models');
+var fs = require('fs');
+var port = 3000;//normalizePort(process.env.PORT || '3000');
+var service = require('os-service');
 app.set('port', port);
 
-/*var server = app.listen(app.get('port'), function() {
-    debug('Express server listening on port ' + server.address().port);
-});*/
+if (process.argv[2] == "--add") {
+    service.add ("VidsJS", {programArgs: ["--run"]}, function(error){ 
+       if (error)
+          console.trace(error);
+    });
+} else if (process.argv[2] == "--remove") {
+    service.remove ("VidsJS", function(error){ 
+       if (error)
+          console.trace(error);
+    });
+} else if (process.argv[2] == "--run") {
 
-var server = http.createServer(app);
+    var logStream = fs.createWriteStream ("vidsjs.log");
+    
+    service.run (logStream, function () {
+        service.stop (0);
+    });
+    
+    var server = http.createServer(app);
 
-models.sequelize.sync().then(function () {
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
-});
+    models.sequelize.sync().then(function () {
+        server.listen(port);
+        server.on('error', function(err) {
+            logStream.write(err);
+        });
+        server.on('listening', function() {
+        });
+        
+    });
 
-function normalizePort(val) { return val; }
-function onError(error) { console.log(error);/* ... */ }
-function onListening() {  }
+    // Run service program code...
+}
+
+
+
+
