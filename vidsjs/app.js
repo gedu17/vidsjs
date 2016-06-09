@@ -4,11 +4,15 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
+var SequelizeStore = require('sequelstore-connect');
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var login = require('./routes/login');
+var lc = require('./modules/loginchecker');
 var app = express();
-
+var connect = require('connect');
+var db = require('./models/index');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -22,9 +26,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
+//Session
+app.use(session({
+    name: "VidsJS Session",
+    secret: "sYS52f0LiGJqjcnrwqa9FV3iVPP9HszmapcQOASBwoTbSRIMIexnW6PX5VQV",
+    saveUninitialized: true,
+    resave: true,
+    //TODO: fix store to work with sequelize
+    //store: new SequelizeStore(db.sequelize)
+}));
+
+app.all('*', lc.loginChecker);
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/login', login);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

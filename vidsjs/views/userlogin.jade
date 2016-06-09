@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    form(name="login", method="post")
+        div.error !{data.error}
+        select(name="userid")
+            each user in data.users
+                option(value=user.id) !{user.name}
+        div.clear
+        input(type="password", name="password")
+        div.clear
+        input(type="submit", value="login")
+        div.clear

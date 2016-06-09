@@ -5,10 +5,10 @@ var http = require('http');
 var models = require('../models');
 var fs = require('fs');
 var port = 3000;//normalizePort(process.env.PORT || '3000');
-var service = require('os-service');
+//var service = require('os-service');
 app.set('port', port);
 
-if (process.argv[2] == "--add") {
+/*if (process.argv[2] == "--add") {
     service.add ("VidsJS", {programArgs: ["--run"]}, function(error){ 
        if (error)
           console.trace(error);
@@ -18,13 +18,13 @@ if (process.argv[2] == "--add") {
        if (error)
           console.trace(error);
     });
-} else if (process.argv[2] == "--run") {
+} else if (process.argv[2] == "--run") {*/
 
     var logStream = fs.createWriteStream ("vidsjs.log");
     
-    service.run (logStream, function () {
+    /*service.run (logStream, function () {
         service.stop (0);
-    });
+    });*/
     
     var server = http.createServer(app);
 
@@ -39,7 +39,7 @@ if (process.argv[2] == "--add") {
     });
 
     // Run service program code...
-}
+//}
 
 
 

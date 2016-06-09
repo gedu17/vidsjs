@@ -103,6 +103,24 @@ function isSeen(id) {
     });
 }
 
+/*
+    * Returns wether user needs to authenticate with a password
+*/
+function getLoginType() {
+    return new Promise(function (resolve, reject) {
+        models.settings.find({ where: { name: 'loginrequired' } }).then(function (lr) {
+            if (lr === null) {
+                reject("Setting not found");
+            }
+            else {
+                resolve(parseInt(lr.value));
+            }
+        }).catch(function (err) {
+            reject("Setting login required not found: " + err);
+        });
+    });
+}
+
 exports.getTypes = getTypes;
 exports.getPath = getPath;
 exports.fixExtension = fixExtension;
@@ -110,3 +128,4 @@ exports.compareDirListing = compareDirListing;
 exports.generateViewUrl = generateViewUrl;
 exports.generateSeenUrl = generateSeenUrl;
 exports.isSeen = isSeen;
+exports.getLoginType = getLoginType;

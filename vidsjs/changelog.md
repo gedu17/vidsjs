@@ -5,6 +5,16 @@
 ###Back-End
 - [ ] Add functionality to add app as an os service
 - [x] Fix range bug in view
+- [ ] Fix rescan bug when some items are deleted before scan
+- [x] Add session support
+- [x] Add Login with password
+- [x] Add Login without password
+- [ ] Add support for sequelstore-connect
+
+###Front-End
+- [x] Login form with password
+- [x] Login form without password
+
 
 ##0.3
 

@@ -96,7 +96,7 @@ function view(res, id, Range) {
                     }
                 }
             });
-        }P
+        }
     }).catch(function (err) {
         console.log("err2 = " + err);
         res.sendStatus(500);

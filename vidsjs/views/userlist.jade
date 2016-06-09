@@ -1,0 +1,7 @@
+extends layout
+
+block content
+    each user in data
+        div.floatLeft 
+            a(href=user.link)= user.name
+        div.clear

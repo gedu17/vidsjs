@@ -4,8 +4,8 @@
         if item.type == 0
             li.noBullets
                 div.floatLeft !{item.name}
-                div.floatRight
-                    a(href='#{item.seen}')= 'Seen'
+                    div.floatRight
+                        a(href='#{item.seen}')= 'Seen'
                 div.clear
             ul
                 +printList(item) 
@@ -13,8 +13,8 @@
             li.noBullets
                 div.floatLeft
                     a(href='#{item.url}')= item.name 
-                div.floatRight
-                    a(href='#{item.seen}')= 'Seen'
+                    div.floatRight
+                        a(href='#{item.seen}')= 'Seen'
                 div.clear
         
 

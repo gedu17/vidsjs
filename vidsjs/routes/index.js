@@ -26,6 +26,7 @@ router.get('/', function (req, res) {
         res.render('dirlist', { content: cont });
     }).catch(function (err) {
         console.log("route / " + err);
+        res.sendStatus(500);
     });
 });
 
