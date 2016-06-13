@@ -10,6 +10,7 @@
 - [x] Add Login with password
 - [x] Add Login without password
 - [ ] Add support for sequelstore-connect
+- [x] Fixed not being able to watch videos after adding login support
 
 ###Front-End
 - [x] Login form with password
