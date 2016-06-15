@@ -2,6 +2,7 @@
 
 var pathJS = require('path');
 var models = require('../models');
+var os     = require('os');
 /*
     * Fetches acceptable video extensions/formats
 */
@@ -23,18 +24,25 @@ function getTypes() {
 }
 
 /*
-    * Fetches video root directory
+    * Fetches video directories from users_data table
 */
-//TODO: Implement an ability to use more than one root directory
 function getPath() {
     return new Promise(function (resolve, reject) {
-        models.settings.find({ where: { name: 'path' } }).then(function (path) {
+        models.users_settings.findAll({ where: { type: 'path' } }).then(function (path) {
             if (path === null) {
-                reject("No path found in db");
+                reject("No paths found in db");
             }
             else {
-                let tmp = path.value.split(';');
-                resolve(tmp.join(pathJS.sep));
+                let ret = Array();
+                for(let i in path) {
+                    let tmp = path[i].value.split(';');
+                    tmp = tmp.join(pathJS.sep);
+                    if(os.type() === 'Linux' || os.type() === 'Darwin') {
+                        tmp = '/' + tmp;
+                    }
+                    ret.push({path: tmp, id: path[i].id});
+                }
+                resolve(ret);
             }
         }).catch(function (err) {
             reject("get path: " + err);

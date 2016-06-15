@@ -11,10 +11,13 @@
 - [x] Add Login without password
 - [ ] Add support for sequelstore-connect
 - [x] Fixed not being able to watch videos after adding login support
+- [x] Add users_settings table to store various information
+- [x] Add multiple scan directory functionality
 
 ###Front-End
 - [x] Login form with password
 - [x] Login form without password
+- [x] Differenciate content by base dir
 
 
 ##0.3

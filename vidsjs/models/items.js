@@ -10,7 +10,8 @@ module.exports = function(sequelize, DataTypes) {
         name: DataTypes.STRING,  
         parent: DataTypes.INTEGER,
         type: DataTypes.INTEGER,
-        path: DataTypes.STRING
+        path: DataTypes.STRING,
+        upid: DataTypes.INTEGER
   }, {
     classMethods: {
       associate: function(models) {

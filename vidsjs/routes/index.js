@@ -19,10 +19,9 @@ function getUserDefinedName(id) {
     
 }
 
-/* GET home page. */
+/* GET returns physical directory listing */
 router.get('/', function (req, res) {
-    mods.dirlist.getDirListing(0, null).then(function (cont) {
-        cont.items.sort(mods.utils.compareDirListing);
+    mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
         res.render('dirlist', { content: cont });
     }).catch(function (err) {
         console.log("route / " + err);

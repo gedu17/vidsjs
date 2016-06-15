@@ -3,15 +3,42 @@
 var models = require('../models');
 var utils = require('./utils');
 
+function physicalDirListing(uid) {
+    return new Promise(function (resolve, reject) {
+        utils.getPath().then(function(paths) {
+            let promiseArray = Array();
+            for(let i in paths) {
+                promiseArray.push(getDirListing(0, paths[i].path, paths[i].id));
+            }
+
+            Promise.all(promiseArray).then(function (data) {
+                let ret = Array();
+                for (let i in data) {
+                    data[i].items.sort(utils.compareDirListing);
+                    ret.concat(data[i]);
+                }
+
+                resolve(data);
+                //resolve(itemArray);
+            }).catch(function (err) {
+                console.log("physicalDirListing = " + err);
+                reject(err);
+            });
+        });
+    });
+        
+}
+
 /*
     * Recursively retrieves dir listing from db
     * level  = Starting directory (default 0)
     * folder = Name of the parent folder (Set to null on first call to not include parent)
 */
-function getDirListing(level, folder) {
+//TODO: remove seen link as its physical representation
+function getDirListing(level, folder, upid) {
     var itemArray = { name: "parentDir", type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.items.findAll({ where: { parent: level },  order: 'type ASC, name ASC' }).then(function (items) {
+        models.items.findAll({ where: { parent: level, upid: upid },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
@@ -28,7 +55,7 @@ function getDirListing(level, folder) {
                             resolve2(false);
                         }).catch(function (tmp2) {
                             if (items[i].type === 0) {
-                                promiseArray.push(getDirListing(items[i].id, items[i].name));
+                                promiseArray.push(getDirListing(items[i].id, items[i].name, upid));
                                 resolve2(true);
                             } 
                             else {
@@ -64,4 +91,5 @@ function getDirListing(level, folder) {
     });
 }
 
-exports.getDirListing = getDirListing;
+//exports.getDirListing = getDirListing;
+exports.physicalDirListing = physicalDirListing;

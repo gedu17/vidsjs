@@ -1,6 +1,5 @@
 ﻿mixin printList(obj)
-    each item in obj.items
-        
+    each item in obj
         if item.type == 0
             li.noBullets
                 div.floatLeft !{item.name}
@@ -8,7 +7,7 @@
                         a(href='#{item.seen}')= 'Seen'
                 div.clear
             ul
-                +printList(item) 
+                +printList(item.items) 
         else
             li.noBullets
                 div.floatLeft
@@ -21,5 +20,7 @@
 extends layout
 
 block content
-    ul
-        +printList(content)
+    each dir in content
+        div !{dir.name}
+        ul
+            +printList(dir.items)
