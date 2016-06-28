@@ -10,14 +10,18 @@
 - [x] Add Login with password
 - [x] Add Login without password
 - [ ] Add support for sequelstore-connect
-- [x] Fixed not being able to watch videos after adding login support
+- [x] Fix not being able to watch videos after adding login support
 - [x] Add users_settings table to store various information
 - [x] Add multiple scan directory functionality
+- [x] Remove scanned entries from database file commited to repo
+- [x] Fix a bug with users_data table column mismatch
 
 ###Front-End
 - [x] Login form with password
 - [x] Login form without password
 - [x] Differenciate content by base dir
+- [x] Add Virtual listing
+- [x] Add Seen listing
 
 
 ##0.3

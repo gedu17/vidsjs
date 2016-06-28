@@ -20,7 +20,6 @@ app.set('port', port);
     });
 } else if (process.argv[2] == "--run") {*/
 
-    var logStream = fs.createWriteStream ("vidsjs.log");
     
     /*service.run (logStream, function () {
         service.stop (0);
@@ -31,7 +30,7 @@ app.set('port', port);
     models.sequelize.sync().then(function () {
         server.listen(port);
         server.on('error', function(err) {
-            logStream.write(err);
+            console.log("server err: " + err);
         });
         server.on('listening', function() {
         });

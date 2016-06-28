@@ -26,9 +26,9 @@ function getTypes() {
 /*
     * Fetches video directories from users_data table
 */
-function getPath() {
+function getPath(uid) {
     return new Promise(function (resolve, reject) {
-        models.users_settings.findAll({ where: { type: 'path' } }).then(function (path) {
+        models.users_settings.findAll({ where: { type: 'path', uid: uid } }).then(function (path) {
             if (path === null) {
                 reject("No paths found in db");
             }
@@ -100,14 +100,16 @@ function generateSeenUrl(id) {
     * id = id of the item in database
 */
 //FIXME: use data field !
+//TODO: reimplement me
 function isSeen(id) {
     return new Promise(function (resolve, reject) {
-        models.users_data.find({ where: { user: 1, item: id } }).then(function (par) {
+        /*models.users_data.find({ where: { user: 1, item: id } }).then(function (par) {
             if (par === null) {
                 reject(false);
             }
             resolve(true);
-        });
+        });*/
+        reject(false);
     });
 }
 

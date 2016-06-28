@@ -1,11 +1,12 @@
 ﻿mixin printList(obj)
     each item in obj
         if item.type == 0
-            li.noBullets
-                div.floatLeft !{item.name}
-                    div.floatRight
-                        a(href='#{item.seen}')= 'Seen'
-                div.clear
+            if item.name != null
+                li.noBullets
+                    div.floatLeft !{item.name}
+                        div.floatRight
+                            a(href='#{item.seen}')= 'Seen'
+                    div.clear
             ul
                 +printList(item.items) 
         else
@@ -31,7 +32,5 @@ block content
     if content.items === null
         div !{content.msg}
     else
-        each dir in content
-            div !{dir.name}
-            ul
-                +printList(dir.items)
+        ul
+            +printList(content)

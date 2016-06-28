@@ -21,13 +21,41 @@ function getUserDefinedName(id) {
 
 /* GET returns physical directory listing */
 router.get('/', function (req, res) {
-    mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
-        res.render('dirlist', { content: cont });
+    //mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
+    //res.render('dirlist', { content: {msg: "NOT IMPLEMENTED", items: null} });
+    /*}).catch(function (err) {
+        console.log("route / " + err);
+        res.sendStatus(500);
+    });*/
+    mods.dirlist.virtualDirListing(req.session.uid).then(function (cont) {
+        res.render('virtlist', { content: cont });
     }).catch(function (err) {
         console.log("route / " + err);
         res.sendStatus(500);
     });
 });
+
+router.get('/pview', function (req, res) {
+    mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
+        res.render('dirlist', { content: cont });
+    }).catch(function (err) {
+        console.log("route /pview " + err);
+        res.sendStatus(500);
+    });
+});
+
+router.get('/sview', function (req, res) {
+    //mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
+    //res.render('dirlist', { content: {msg: "NOT IMPLEMENTED", items: null} });
+    mods.dirlist.seenDirListing(req.session.uid).then(function (cont) {
+        console.log(cont);
+        res.render('virtlist', { content: cont });
+    }).catch(function (err) {
+        console.log("route /sview " + err);
+        res.sendStatus(500);
+    });
+});
+
 
 router.get('/api/dirlist', function (req, res) {
     mods.dirlist.getDirListing(0, null).then(function (cont) {
@@ -54,7 +82,12 @@ router.get('/view', function (req, res) {
 });
 
 router.get('/scanDirs', function (req, res) {
-    mods.dirscan.scan().then(function (number) {
+    mods.dirscan.dirscan(req.session.uid).then(function (params) {
+        res.render('index', { content: 'list is up to date !' });
+    }).catch(function (err) {
+        console.log("dirscan = " + err);
+    });
+    /*mods.dirscan.scan().then(function (number) {
         let num = parseInt(number);
         if (num === 0) {
             res.render('index', { content: 'list is up to date !' });
@@ -65,7 +98,7 @@ router.get('/scanDirs', function (req, res) {
         }
     }).catch(function (err) {
         console.log("dirscan err = " + err);
-    });
+    });*/
 });
 
 module.exports = router;

@@ -9,7 +9,13 @@ module.exports = function(sequelize, DataTypes) {
         },
         user: DataTypes.INTEGER,
         item: DataTypes.INTEGER,
-        data: DataTypes.TEXT
+        data: DataTypes.TEXT,
+        seen: DataTypes.INTEGER,
+        deleted: DataTypes.INTEGER,
+        parent: DataTypes.INTEGER,
+        type: DataTypes.INTEGER,
+        string: DataTypes.STRING
+
     }, {
     classMethods: {
             associate: function (models) {
