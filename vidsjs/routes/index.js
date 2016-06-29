@@ -83,6 +83,7 @@ router.get('/view', function (req, res) {
 
 router.get('/scanDirs', function (req, res) {
     mods.dirscan.dirscan(req.session.uid).then(function (params) {
+        console.log("changed = " + params);
         res.render('index', { content: 'list is up to date !' });
     }).catch(function (err) {
         console.log("dirscan = " + err);

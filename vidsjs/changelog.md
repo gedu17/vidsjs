@@ -3,13 +3,12 @@
 ##0.3.1
 
 ###Back-End
-- [ ] Add functionality to add app as an os service
 - [x] Fix range bug in view
-- [ ] Fix rescan bug when some items are deleted before scan
+- [x] Fix rescan bug when some items are deleted before scan
 - [x] Add session support
 - [x] Add Login with password
 - [x] Add Login without password
-- [ ] Add support for sequelstore-connect
+- [x] Add support for connect-session-sequelize
 - [x] Fix not being able to watch videos after adding login support
 - [x] Add users_settings table to store various information
 - [x] Add multiple scan directory functionality

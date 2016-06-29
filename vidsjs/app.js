@@ -5,14 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var SequelizeStore = require('sequelstore-connect');
+var SequelizeStore = require('connect-session-sequelize')(session.Store);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
 var lc = require('./modules/loginchecker');
 var app = express();
 var connect = require('connect');
-var db = require('./models/index');
+var db = require('./models');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -32,8 +32,7 @@ app.use(session({
     secret: "sYS52f0LiGJqjcnrwqa9FV3iVPP9HszmapcQOASBwoTbSRIMIexnW6PX5VQV",
     saveUninitialized: true,
     resave: true,
-    //TODO: fix store to work with sequelize
-    //store: new SequelizeStore(db.sequelize)
+    store: new SequelizeStore({db: db.sequelize})
 }));
 
 app.all('*', lc.loginChecker);

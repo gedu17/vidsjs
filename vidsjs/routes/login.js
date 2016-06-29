@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mods = require('../modules');
-var models = require('../models');
+//var models = require('../models');
 
 /* GET users login template */
 router.get('/', function (req, res) {
