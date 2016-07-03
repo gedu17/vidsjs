@@ -25,6 +25,7 @@ function getTypes() {
 
 /*
     * Fetches video directories from users_data table
+    * uid = Id of the user
 */
 function getPath(uid) {
     return new Promise(function (resolve, reject) {
@@ -52,7 +53,7 @@ function getPath(uid) {
 
 /*
     * Returns the file extension and removes the dot from extension name
-    * file = file name with extension
+    * file = File name with extension
 */
 function fixExtension(file) {
     return pathJS.extname(file).substring(1, file.length);
@@ -77,7 +78,7 @@ function compareDirListing(a, b) {
 
 /*
     * Returns link to a video
-    * id = id of the video in database
+    * id = Id of the video in database
 */
 
 //FIXME: implement
@@ -85,10 +86,9 @@ function generateViewUrl(id) {
     return '/view/' + id;
 }
 
-
 /*
     * Returns link to flag item as seen
-    * id = id of the item in database
+    * id = Id of the item in database
 */
 //FIXME: implement
 function generateSeenUrl(id) {
@@ -96,20 +96,70 @@ function generateSeenUrl(id) {
 }
 
 /*
-    * Returns boolean wether item is flagged as seen by user
-    * id = id of the item in database
+    * Returns link to flag item as deleted
+    * id = Id of the item in database
 */
-//FIXME: use data field !
-//TODO: reimplement me
-function isSeen(id) {
+//FIXME: implement
+function generateDeletedUrl(id) {
+    return '/deleted/' + id;
+}
+
+
+/*
+    * Returns boolean wether item is flagged as seen by user
+    * id = Id of the item in database
+*/
+function isSeenOrDeleted(id) {
     return new Promise(function (resolve, reject) {
-        /*models.users_data.find({ where: { user: 1, item: id } }).then(function (par) {
-            if (par === null) {
+        if(id > 0) {
+            models.users_data.find({ where: { id: id } }).then(function (par) {
+                if (par === null) {
+                    reject(false);
+                }
+                if (par.seen > 0 || par.deleted > 0) {
+                    resolve(true);
+                }
                 reject(false);
+            });
+        }
+        else {
+            reject(false);
+        }
+    });
+}
+
+/*
+    * Changes item name in users_data table
+    * id   = Id of the item in database
+    * name = New name
+*/
+function changeItemName(id, name) {
+    return new Promise(function (resolve, reject) {
+        models.users_data.find({ where: {id: id}, limit: 1}).then(function (data) {
+            if(data === null) {
+                reject("id not found");
             }
+            models.users_data.update({data: name}, {where: {id: id}, limit: 1}).then(function (data) {
+                resolve("name changed");  
+            });
+        });
+    });
+}
+
+/*
+    * Creates folder in users_data
+    * name   = Name of the folder
+    * parent = Parent id
+    * uid    = Id of the user
+*/
+function createFolder(name, parent, uid) {
+    return new Promise(function (resolve, reject) {
+        models.users_data.create({ user: uid, data: name, item: 0, seen: 0, deleted: 0, parent: parent, type: 0 }).then(function (data) {
             resolve(true);
-        });*/
-        reject(false);
+        }).catch(function (data) {
+            reject(false);
+        });
+        
     });
 }
 
@@ -137,5 +187,8 @@ exports.fixExtension = fixExtension;
 exports.compareDirListing = compareDirListing;
 exports.generateViewUrl = generateViewUrl;
 exports.generateSeenUrl = generateSeenUrl;
-exports.isSeen = isSeen;
+exports.generateDeletedUrl = generateDeletedUrl;
+exports.isSeenOrDeleted = isSeenOrDeleted;
 exports.getLoginType = getLoginType;
+exports.changeItemName = changeItemName;
+exports.createFolder = createFolder;

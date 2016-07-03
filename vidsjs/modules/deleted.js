@@ -1,23 +1,23 @@
-﻿'use strict';
+'use strict';
 
 var models = require('../models');
 
 /*
-    * Flags item as seen by user
+    * Flags item as deleted by user
     * res = Response object from expressjs
     * id  = Id of the item to be flagged 
 */
 //TODO: check if the user id matches
-function seen(res, id) {
+function deleted(res, id) {
     models.users_data.find({ where: { id: id } }).then(function (item) {
         if (item === null) {
             //TODO: add message to s_m
             res.sendStatus(404);
         } else {
-            models.users_data.update({ seen: 1 }, {where: {id: id}, limit: 1});
+            models.users_data.update({ deleted: 1 }, {where: {id: id}, limit: 1});
             res.redirect('/');
         }
     }); 
 }
 
-exports.seen = seen;
+exports.deleted = deleted;

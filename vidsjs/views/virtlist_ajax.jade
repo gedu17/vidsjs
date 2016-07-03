@@ -28,13 +28,10 @@
                     a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
                     onClick='initModalForRename(\'#{item.id}\', \'#{item.name}\')') Change name
 
-extends layout
-
-block content
-    if content.items === null
-        div !{content.msg}
-    else
-        a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
-                    onClick='initModalForNewFolder()') Create new folder
-        div.list-group
-            +printList(content, 1)
+if content.items === null
+    div !{content.msg}
+else
+    a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
+                onClick='initModalForNewFolder()') Create new folder
+    div.list-group
+        +printList(content, 1)

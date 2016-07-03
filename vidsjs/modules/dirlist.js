@@ -104,25 +104,25 @@ function getDirListing(level, folder, upid) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
             }
             
-            utils.isSeen(level).then(function (tmp) {
+            /*utils.isSeen(level).then(function (tmp) {
                 reject(tmp);
-            }).catch(function (tmp) {                
+            }).catch(function (tmp) {   */             
                 var cycleItem = function (i) {
                     return new Promise(function (resolve2, reject2) {
                         //FIXME: get user id and fix spaghetti
                         //FIXME: check data field for data (seen, name...)
-                        utils.isSeen(items[i].id).then(function (tmp2) {
+                        /*utils.isSeen(items[i].id).then(function (tmp2) {
                             resolve2(false);
-                        }).catch(function (tmp2) {
+                        }).catch(function (tmp2) {*/
                             if (items[i].type === 0) {
                                 promiseArray.push(getDirListing(items[i].id, items[i].name, upid));
                                 resolve2(true);
                             } 
                             else {
-                                itemArray.items.push({ name: items[i].name, type: 1, url: utils.generateViewUrl(items[i].id), seen: utils.generateSeenUrl(items[i].id) });
+                                itemArray.items.push({ name: items[i].name, type: 1, url: utils.generateViewUrl(items[i].id), seen: null });
                                 resolve2(true);
                             }
-                        });
+                        //});
                     });
                 }
 
@@ -144,7 +144,7 @@ function getDirListing(level, folder, upid) {
                         resolve(itemArray);
                     }
                 });
-            });
+            //});
         }).catch(function (err) {
             reject("dirlist err: " + err);
         });
@@ -158,25 +158,28 @@ function getDirListing2(level, folder, uid) {
         models.users_data.findAll({ where: { parent: level, user: uid },  order: 'type ASC, data ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
-                itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
+                itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level), deleted: utils.generateDeletedUrl(level), id: level };
             }
             
-            utils.isSeen(level).then(function (tmp) {
+            utils.isSeenOrDeleted(level).then(function (tmp) {
                 reject(tmp);
-            }).catch(function (tmp) {                
+            }).catch(function (tmp) {
                 var cycleItem = function (i) {
                     return new Promise(function (resolve2, reject2) {
                         //FIXME: get user id and fix spaghetti
                         //FIXME: check data field for data (seen, name...)
-                        utils.isSeen(items[i].id).then(function (tmp2) {
+                        //TODO: change resolve2 to reject2
+                        utils.isSeenOrDeleted(items[i].id).then(function (tmp2) {
                             resolve2(false);
                         }).catch(function (tmp2) {
+                        
                             if (items[i].type === 0) {
                                 promiseArray.push(getDirListing2(items[i].id, items[i].data, uid));
                                 resolve2(true);
                             } 
                             else {
-                                itemArray.items.push({ name: items[i].data, type: 1, url: utils.generateViewUrl(items[i].id), seen: utils.generateSeenUrl(items[i].id) });
+                                itemArray.items.push({ name: items[i].data, type: 1, url: utils.generateViewUrl(items[i].item), seen: utils.generateSeenUrl(items[i].id),
+                                    deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
                                 resolve2(true);
                             }
                         });

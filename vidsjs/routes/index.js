@@ -57,12 +57,12 @@ router.get('/sview', function (req, res) {
 });
 
 
-router.get('/api/dirlist', function (req, res) {
-    mods.dirlist.getDirListing(0, null).then(function (cont) {
-        cont.items.sort(mods.utils.compareDirListing);
-        res.render('dirlist', { content: cont });
+router.get('/api/virtlist', function (req, res) {
+    mods.dirlist.virtualDirListing(req.session.uid).then(function (cont) {
+        res.render('virtlist_ajax', { content: cont });
     }).catch(function (err) {
         console.log("route /api/dirlist " + err);
+        res.sendStatus(500);
     });
 });
 
@@ -73,6 +73,29 @@ router.get('/view/:id', function (req, res) {
 router.get('/seen/:id', function (req, res) {
     mods.seen.seen(res, req.params.id);
     
+});
+
+router.get('/deleted/:id', function (req, res) {
+    mods.deleted.deleted(res, req.params.id);
+    
+});
+
+router.get('/changeItemName/:id/:name', function (req, res) {
+    mods.utils.changeItemName(req.params.id, req.params.name).then(function (params) {
+        res.sendStatus(200);
+    }).catch(function (params) {
+        console.log("changeItemName error !");
+        res.sendStatus(500);
+    });
+});
+
+router.get('/createFolder/:parent/:name', function (req, res) {
+    mods.utils.createFolder(req.params.name, req.params.parent, req.session.uid).then(function (params) {
+        res.sendStatus(200);
+    }).catch(function (params) {
+        console.log("createFolder error !");
+        res.sendStatus(500);
+    });
 });
 
 /* debuging some strange requests */

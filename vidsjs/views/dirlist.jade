@@ -20,14 +20,6 @@
 extends layout
 
 block content
-    div 
-        a(href='/')= 'Virtual view'
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        a(href='/pview')= 'Physical view'
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        a(href='/sview')= 'Seen view'
-        br
-        br
     if content.items === null
         div !{content.msg}
     else

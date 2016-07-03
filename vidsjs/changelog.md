@@ -1,5 +1,21 @@
 #VidsJS
 
+##0.3.2
+
+###Back-End
+- [x] Ability to create virtual folders
+- [x] Ability to flag item as seen, deleted
+- [x] Ability to change item name
+- [x] Fix incorrect id in virtual view
+- [x] Change isSeen method to isSeenOrDeleted in utils
+
+###Front-End
+- [x] Ability to create virtual folders
+- [x] Ability to flag item as seen, deleted
+- [x] Ability to change item name
+- [x] Add Bootstrap
+- [x] Add jQuery
+
 ##0.3.1
 
 ###Back-End
