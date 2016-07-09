@@ -12,7 +12,9 @@
                     a(href='#{item.seen}',style='margin-left: 15px')= 'Seen' 
                     a(href='#{item.deleted}',style='margin-left: 15px')= 'Deleted'  
                     a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
-                    onClick='initModalForRename(\'#{item.id}\', \'#{item.name}\')') Change name
+                    onClick='initModalForRename(\'#{item.id}\', \'#{item.name}\')')= 'Change name'
+                    a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
+                    onClick='initModalForMove(\'#{item.id}\')')= 'Move'
             
                 div.collapse(id=item.id)
                     +printList(item.items, level+1) 
@@ -26,12 +28,18 @@
                     a(href='#{item.seen}',style='margin-left: 15px')= 'Seen'   
                     a(href='#{item.deleted}',style='margin-left: 15px')= 'Deleted'  
                     a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
-                    onClick='initModalForRename(\'#{item.id}\', \'#{item.name}\')') Change name
+                    onClick='initModalForRename(\'#{item.id}\', \'#{item.name}\')')= 'Change name'
+                    a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
+                    onClick='initModalForMove(\'#{item.id}\')')= 'Move'
 
-if content.items === null
-    div !{content.msg}
-else
-    a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
-                onClick='initModalForNewFolder()') Create new folder
-    div.list-group
-        +printList(content, 1)
+div.container-fluid.col-md-12.content-box
+        div.panel.panel-default
+            div.panel-heading Virtual View
+            div.panel-body
+                if content.items === null
+                    div !{content.msg}
+                else
+                    a(href='#', data-toggle='modal' data-target='#popup' style='margin-left: 15px'
+                                onClick='initModalForNewFolder()') Create new folder
+                    div.list-group
+                        +printList(content, 1)

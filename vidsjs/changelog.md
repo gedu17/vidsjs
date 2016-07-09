@@ -1,5 +1,14 @@
 #VidsJS
 
+##0.3.3
+###Back-End
+- [x] Ability to move items and folders
+
+###Front-End
+- [x] Ability to move items and folders
+- [x] New template for user selection
+- [x] New template for user login
+
 ##0.3.2
 
 ###Back-End

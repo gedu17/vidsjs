@@ -1,7 +1,21 @@
 extends layout
 
 block content
-    each user in data
-        div.floatLeft 
-            a(href=user.link)= user.name
-        div.clear
+    div.container-fluid.col-md-4.login-box
+        div.panel.panel-default
+            div.panel-heading Select User
+            div.panel-body
+                each user in data 
+                    div.media
+                        div.media-left
+                            img.media-object.avatar.img-thumbnail(alt='64x64', data-src='images/avatar.jpg')
+                        div.media-body
+                            h1.media-heading
+                                a(href=user.link)= user.name
+                                
+                            span.label.label-primary.label-pill #{user.itemCount} items
+                            span.label.label-info.label-pill.label-margin
+                                if user.level > 1
+                                    = 'Admin'
+                                else
+                                    = 'Regular user'                                

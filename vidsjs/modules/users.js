@@ -85,13 +85,30 @@ function getLogin(error) {
 */
 function getUserList() {
     return new Promise(function (resolve, reject) {
-        models.users.findAll().then(function(data) {
-            var ret = Array();
+        var ret = Array();
+        models.users.findAll({where: {active: 1}}).then(function(data) {
             if(data !== null) {
-                data.map(function (obj) {
-                    ret.push({"name": obj.name, "link": getUserSetLink(obj.id)});
-                });   
-                resolve(ret);
+                var promiseArray = new Array();
+                var cycle = function(obj) {
+                    return new Promise(function (resolve2, reject2) {
+                        models.users_data.count({where: {user: obj.id}}).then(function (count) {
+                            resolve2({"name": obj.name, "link": getUserSetLink(obj.id), "level": obj.level, "itemCount": count});
+                        });
+                    });
+                }
+
+                for(let i in data) {
+                    promiseArray.push(cycle(data[i]));
+                }
+
+                Promise.all(promiseArray).then(function (data2) {
+                    let ret = Array();
+                    data2.map(function (obj) {
+                        ret.push(obj);
+                    });
+                    resolve(ret);
+                });
+                //resolve(ret);
             }   
             else {
                 reject("No users");

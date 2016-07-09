@@ -1,13 +1,21 @@
 extends layout
 
 block content
-    form(name="login", method="post")
-        div.error !{data.error}
-        select(name="userid")
-            each user in data.users
-                option(value=user.id) !{user.name}
-        div.clear
-        input(type="password", name="password")
-        div.clear
-        input(type="submit", value="login")
-        div.clear
+    div.container-fluid.col-md-4.login-box
+        div.panel.panel-default
+            div.panel-heading Login
+            div.panel-body
+                form(name="login", method="post") 
+                    if data.error != null
+                        div.alert.alert-danger(role="alert") !{data.error}
+                    fieldset.form-group
+                        label(for="userSelect") User
+                        select.form-control#userSelect(name="userid")
+                            each user in data.users
+                                option(value=user.id) !{user.name}
+                    fieldset.form-group
+                        label(for="password") Password
+                        input.form-control#password(type="password", name="password",placeholder="Password")
+                    button.btn.btn-primary(type="submit" class="btn btn-primary") Login
+                                           
+    

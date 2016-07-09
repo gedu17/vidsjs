@@ -14,7 +14,7 @@ router.get('/', function (req, res) {
             });
         } 
         else {
-            mods.users.getLogin("").then(function(users) {
+            mods.users.getLogin(null).then(function(users) {
                 res.render('userlogin', {data: users});
             }).catch(function(err) {
                 console.log(err);

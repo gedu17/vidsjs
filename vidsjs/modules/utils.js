@@ -164,6 +164,30 @@ function createFolder(name, parent, uid) {
 }
 
 /*
+    * Move item from one parent to another
+    * id     = Id of the item
+    * parent = New parent for item
+*/
+function moveItem(id, parent, uid) {
+    return new Promise(function (resolve, reject) {
+        
+        models.users_data.find({where:{id: parent}}).then(function (data) {
+            if((data === null || data.type != 0) && parent != 0) {
+                reject(false);
+            }
+            else {
+                models.users_data.update( {parent: parent}, {where: {id: id, user: uid}, limit: 1}).then(function (data) {
+                    resolve(true);    
+                }).catch(function (data) {
+                    reject(false);
+                });
+            }
+            
+        });        
+    });
+}
+
+/*
     * Returns wether user needs to authenticate with a password
 */
 function getLoginType() {
@@ -192,3 +216,4 @@ exports.isSeenOrDeleted = isSeenOrDeleted;
 exports.getLoginType = getLoginType;
 exports.changeItemName = changeItemName;
 exports.createFolder = createFolder;
+exports.moveItem = moveItem;

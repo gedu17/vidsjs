@@ -7,6 +7,8 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css')
+
     script(src='/javascripts/jquery-2.2.4.min.js')
     script(src='/javascripts/bootstrap.min.js')
     script(src='/javascripts/scripts.js')
@@ -45,5 +47,7 @@ html
               a(href='/sview')= 'Seen View'
             li
               a(href='/scandirs')= 'Scan Dirs'
+            li
+              a(href='/logout')= 'Log out'
     div.container#maincontainer
       block content

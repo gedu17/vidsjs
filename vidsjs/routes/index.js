@@ -98,11 +98,25 @@ router.get('/createFolder/:parent/:name', function (req, res) {
     });
 });
 
+router.get('/moveItem/:id/:parent', function (req, res) {
+    mods.utils.moveItem(req.params.id, req.params.parent, req.session.uid).then(function (params) {
+        res.sendStatus(200);
+    }).catch(function (params) {
+        console.log("moveItem error !");
+        res.sendStatus(500);
+    });
+});
+
 /* debuging some strange requests */
 router.get('/view', function (req, res) {
     //console.log(req);
     res.sendStatus(404);
 });
+
+router.get('/logout', function (req, res) {
+    req.session.destroy();
+    res.redirect('/login');
+})
 
 router.get('/scanDirs', function (req, res) {
     mods.dirscan.dirscan(req.session.uid).then(function (params) {
