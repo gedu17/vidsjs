@@ -101,7 +101,7 @@ function getDirListing(level, folder, upid) {
         models.items.findAll({ where: { parent: level, upid: upid },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
-                itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
+                itemArray = { name: folder, type: 0, items: Array(), id: level, seen: utils.generateSeenUrl(level) };
             }
             
             /*utils.isSeen(level).then(function (tmp) {
@@ -119,8 +119,11 @@ function getDirListing(level, folder, upid) {
                                 resolve2(true);
                             } 
                             else {
-                                itemArray.items.push({ name: items[i].name, type: 1, url: utils.generateViewUrl(items[i].id), seen: null });
+                                utils.generatePhysicalViewUrl(items[i].id).then(function (viewUrl) {
+                                    itemArray.items.push({ name: items[i].name, type: 1, id: items[i].id, url: viewUrl});
                                 resolve2(true);
+                                });
+                                
                             }
                         //});
                     });
@@ -155,56 +158,59 @@ function getDirListing(level, folder, upid) {
 function getDirListing2(level, folder, uid) {
     var itemArray = { name: null, type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.users_data.findAll({ where: { parent: level, user: uid },  order: 'type ASC, data ASC' }).then(function (items) {
+        models.users_data.findAll({ where: { pid: level, uid: uid, seen: 0, deleted: 0 },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level), deleted: utils.generateDeletedUrl(level), id: level };
             }
-            
-            utils.isSeenOrDeleted(level).then(function (tmp) {
+            //TODO: test if commenting didnt broke view (seeing seen videos and folders)
+            /*utils.isSeenOrDeleted(level).then(function (tmp) {
                 reject(tmp);
-            }).catch(function (tmp) {
-                var cycleItem = function (i) {
-                    return new Promise(function (resolve2, reject2) {
-                        //FIXME: get user id and fix spaghetti
-                        //FIXME: check data field for data (seen, name...)
-                        //TODO: change resolve2 to reject2
-                        utils.isSeenOrDeleted(items[i].id).then(function (tmp2) {
-                            resolve2(false);
-                        }).catch(function (tmp2) {
+            }).catch(function (tmp) {*/
+            var cycleItem = function (i) {
+                return new Promise(function (resolve2, reject2) {
+                    //FIXME: get user id and fix spaghetti
+                    //FIXME: check data field for data (seen, name...)
+                    //TODO: change resolve2 to reject2
+                    /*utils.isSeenOrDeleted(items[i].id).then(function (tmp2) {
+                        resolve2(false);
+                    }).catch(function (tmp2) {*/
+                    
+                    if (items[i].type === 0) {
+                        promiseArray.push(getDirListing2(items[i].id, items[i].name, uid));
+                        resolve2(true);
+                    } 
+                    else {
+                        utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
+                            itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
+                            deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
+                            resolve2(true);
+                        });
                         
-                            if (items[i].type === 0) {
-                                promiseArray.push(getDirListing2(items[i].id, items[i].data, uid));
-                                resolve2(true);
-                            } 
-                            else {
-                                itemArray.items.push({ name: items[i].data, type: 1, url: utils.generateViewUrl(items[i].item), seen: utils.generateSeenUrl(items[i].id),
-                                    deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
-                                resolve2(true);
-                            }
-                        });
-                    });
-                }
-
-                var cyclePromises = Array();
-                for (let i in items) {
-                    cyclePromises.push(cycleItem(i));
-                }
-                
-                Promise.all(cyclePromises).then(function (tmp3) {
-                    if (promiseArray.length > 0) {
-                        Promise.all(promiseArray).then(function (data) {
-                            for (let i in data) {
-                                data[i].items.sort(utils.compareDirListing);
-                                itemArray.items.push(data[i]);
-                            }
-                            resolve(itemArray);
-                        });
-                    } else {
-                        resolve(itemArray);
                     }
+                    //});
                 });
+            }
+
+            var cyclePromises = Array();
+            for (let i in items) {
+                cyclePromises.push(cycleItem(i));
+            }
+            
+            Promise.all(cyclePromises).then(function (tmp3) {
+                if (promiseArray.length > 0) {
+                    Promise.all(promiseArray).then(function (data) {
+                        for (let i in data) {
+                            data[i].items.sort(utils.compareDirListing);
+                            itemArray.items.push(data[i]);
+                        }
+                        resolve(itemArray);
+                    });
+                } else {
+                    resolve(itemArray);
+                }
             });
+            //});
         }).catch(function (err) {
             reject("dirlist err: " + err);
         });
@@ -215,7 +221,7 @@ function getDirListing2(level, folder, uid) {
 function getDirListing3(level, folder, uid) {
     var itemArray = { name: null, type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.users_data.findAll({ where: { parent: level, user: uid, seen: 1 },  order: 'type ASC, data ASC' }).then(function (items) {
+        models.users_data.findAll({ where: { pid: level, uid: uid, seen: 1 },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
@@ -232,12 +238,15 @@ function getDirListing3(level, folder, uid) {
                         resolve2(false);
                     }).catch(function (tmp2) {*/
                     if (items[i].type === 0) {
-                        promiseArray.push(getDirListing3(items[i].id, items[i].data, uid));
+                        promiseArray.push(getDirListing3(items[i].id, items[i].name, uid));
                         resolve2(true);
                     } 
                     else {
-                        itemArray.items.push({ name: items[i].data, type: 1, url: utils.generateViewUrl(items[i].id), seen: utils.generateSeenUrl(items[i].id) });
-                        resolve2(true);
+                        utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
+                            itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
+                            deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
+                            resolve2(true);
+                        });
                     }
                     //});
                 });

@@ -91,7 +91,7 @@ function getUserList() {
                 var promiseArray = new Array();
                 var cycle = function(obj) {
                     return new Promise(function (resolve2, reject2) {
-                        models.users_data.count({where: {user: obj.id}}).then(function (count) {
+                        models.users_data.count({where: {uid: obj.id}}).then(function (count) {
                             resolve2({"name": obj.name, "link": getUserSetLink(obj.id), "level": obj.level, "itemCount": count});
                         });
                     });

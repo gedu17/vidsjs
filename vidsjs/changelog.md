@@ -1,5 +1,29 @@
 #VidsJS
 
+##0.3.5
+###Back-End
+- [ ] Change virtual view url scheme to /view/:id/:name.:format
+- [ ] Change physical view url scheme to /pview/:id/:name.:format
+- [ ] Add extension to every video link and recognise that in view
+- [ ] Add ass, sub, ssa, smi columns as types and add them to db when searching
+- [ ] Remake subrip from a column in db to separate item types
+- [ ] Add support to serve subtitles with the same name as video but different extension
+- [ ] Add column in items for mime type ????
+
+###Front-End
+- [ ] Add modal open when opening video for view, when returned after the video to tag as seen, rate video, maybe some social buttons
+
+##0.3.4
+###Back-End
+- [x] Rename users_data columns
+- [x] Change file extension detection in favor of mime types
+- [x] Remove Filetypes row from settings table
+- [x] Add support for srt file scanning
+- [x] Add system_messages table
+
+###Front-End
+- [x] Update physical view template to match virtual view
+
 ##0.3.3
 ###Back-End
 - [x] Ability to move items and folders

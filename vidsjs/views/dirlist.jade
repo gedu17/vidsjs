@@ -1,29 +1,39 @@
-﻿mixin printList(obj)
+﻿mixin printList(obj, level)
+    - var pad = 25 * level
     each item in obj
         if item.type == 0
-            li.noBullets
-                div.floatLeft !{item.name}
-                    div.floatRight
-                        a(href='#{item.seen}')= 'Seen'
-                div.clear
-            ul
-                +printList(item.items) 
+            if item.name != null
+                div.list-group-item(style='padding-left: #{pad}px')
+                    button.btn.btn-link(type='button', data-toggle='collapse', data-target='##{item.id}')
+                        span.glyphicon.glyphicon-folder-close(aria-hidden='true')
+                            span(style='margin-left: 15px')
+                                span(id='#{item.id}_name')= item.name
+                    span.label.label-default.label-pill.pull-xs-right !{item.items.length} 
+
+                div.collapse(id=item.id)
+                    +printList(item.items, level+1) 
+            else
+                +printList(item.items, level) 
         else
-            li.noBullets
-                div.floatLeft
-                    a(href='#{item.url}')= item.name 
-                    div.floatRight
-                        a(href='#{item.seen}')= 'Seen'
-                div.clear
-        
+            div.collapsed.list-group-item
+                span.glyphicon.glyphicon-film(aria-hidden='true',style='padding-left: #{pad}px')
+                    a(href='#{item.url}',style='margin-left: 15px')
+                        span(id='#{item.id}_name')= item.name  
+
 
 extends layout
 
 block content
-    if content.items === null
-        div !{content.msg}
-    else
-        each dir in content
-            div !{dir.name}
-            ul
-                +printList(dir.items)
+    div.container-fluid.col-md-12.content-box
+        div.panel.panel-default
+            div.panel-heading Physical View
+            div.panel-body
+                if content.items === null
+                    div !{content.msg}
+                else
+                    each dir in content
+                        div !{dir.name}
+                        div.list-group
+                            +printList(dir.items, 1)
+
+        

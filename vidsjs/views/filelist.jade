@@ -1,0 +1,30 @@
+doctype html
+html
+    head
+        title Index of {folder.name}
+    body
+        h1 Index of {folder.name}
+    table
+        tr
+            th Name
+            th Last modified
+            th Size
+            th Description
+        tr
+            th(colspan='5')
+                hr
+        tr
+            td
+                a(href=item.srt.link)= item.srt.name
+            td= date
+            td= item.srt.size
+            td= &nbsp;
+        tr
+            td
+                a(href=item.file.link)= item.file.name
+            td= date
+            td= item.file.size
+            td= &nbsp;
+        tr
+            th(colspan='5')
+                hr

@@ -6,23 +6,33 @@ var items = require('./items');
 var pathJS = require('path');
 var fs = require('fs');
 
-var fileTypes = '';
 var basePath = '';
+var mime = require('mime');
 
 /*
-    * Checks wether file extension matches allowed ones
-    * ext = extension
+    * Checks wether file has mime type of video/<type>  
+    * file = File to check
 */
-//TODO: change file extensions to mime types
-function checkType(ext) {
-    let found = false;
-    for (let i in fileTypes) {
-        if (fileTypes[i] === ext) {
-            found = true;
-            break;
-        }
+function checkType(file) {
+    let type = mime.lookup(file);
+    let leftSide = type.split('/');
+    if(leftSide[0] === "video") {
+        return true;
     }
-    return found;
+    return false;
+}
+
+/*
+    * Checks wether file has mime type of 
+    * file = File to check
+*/
+function checkSubrip(file) {
+    let type = mime.lookup(file);
+    let requiredType = "application/x-subrip";
+    if(type === requiredType) {
+        return true;
+    }
+    return false;
 }
 
 /*
@@ -35,7 +45,7 @@ function deleteMissingItems(uid, itemList) {
         if (itemList.items.length > 0) {
             for (let i in itemList.items) {
                 models.items.destroy({ where: { id: itemList.items[i].id }, limit: 1 });
-                models.users_data.destroy({ where: { item: itemList.items[i].id, user: uid}, limit: 1 });
+                models.users_data.destroy({ where: { iid: itemList.items[i].id, uid: uid}, limit: 1 });
             }
             itemList.items.length = 0;
             resolve(true);
@@ -54,10 +64,6 @@ function init(uid) {
     return new Promise(function (resolve, reject) {
         utils.getPath(uid).then(function (data) {
             basePath = data;
-        });
-        utils.getTypes().then(function (data) {
-            fileTypes = data;
-           
         });
         resolve(true);
     });
@@ -127,14 +133,14 @@ function readDir(path, level, itemList, upid, uid, udid) {
                     try {
                         let stats = fs.statSync(newPath);
                         if (stats.isDirectory()) {
+                            //TODO: make this part easier to understand
                             itemList.removeItem({ path: newPath }).then(function (msg) {
                                 folderArray.push(readDir(newPath, parseInt(msg), itemList, upid, uid, udid));
                             }).catch(function (msg) {
-
                                 models.items.create({ name: data[i], parent: level, type: 0, path: newPath, upid: upid }).then(function (createditem) {
                                     let newlevel = createditem.id;
                                     
-                                    models.users_data.create({ user: uid, data: data[i], item: newlevel, seen: 0, deleted: 0, parent: udid, type: 0 })
+                                    models.users_data.create({ uid: uid, name: data[i], iid: newlevel, seen: 0, deleted: 0, pid: udid, type: 0 })
                                     .then(function (createditem2) {
                                         folderArray.push(readDir(newPath, newlevel, itemList, upid, uid, createditem2.id));
                                     });                                    
@@ -142,14 +148,20 @@ function readDir(path, level, itemList, upid, uid, udid) {
                             });
                         } 
                         else {
-                            if (checkType(utils.fixExtension(data[i]))) {
+                            if (checkType(data[i])) {
                                 itemList.removeItem({ path: newPath }).catch(function (msg) {
                                     let tmp = pathJS.parse(data[i]);
                                     models.items.create({ name: tmp.name, parent: level, type: 1, path: newPath, upid: upid }).then(function (createditem) {
                                         let newlevel = createditem.id;
-                                        models.users_data.create({ user: uid, data: data[i], item: newlevel, seen: 0, deleted: 0, parent: udid, type: 1 });
+                                        models.users_data.create({ uid: uid, name: tmp.name, iid: newlevel, seen: 0, deleted: 0, pid: udid, type: 1 });
                                     });
                                 });
+                            }
+                            else if(checkSubrip(data[i])){
+                                //to whom bind the subtitle file, parent folder ?????
+                                //check for item with same name in items, if found use it as parent, if not dont add?, emit system mesage
+                                models.users_data.create({ name: tmp.name, parent: newlevel})
+                                //models.users_data.update({ subrip: 1 }, {where: {id: level}, limit: 1});
                             }
                         }
                     } catch (err) {

@@ -3,25 +3,6 @@
 var pathJS = require('path');
 var models = require('../models');
 var os     = require('os');
-/*
-    * Fetches acceptable video extensions/formats
-*/
-
-//TODO: change file extensions to mime types
-function getTypes() {
-    return new Promise(function (resolve, reject) {
-        models.settings.find({ where: { name: 'filetypes' } }).then(function (ft) {
-            if (ft === null) {
-                reject("no types found");
-            }
-            else {
-                resolve(ft.value.split(';'));
-            }
-        }).catch(function (err) {
-            reject("Filetypes not found: " + err);
-        });
-    });
-}
 
 /*
     * Fetches video directories from users_data table
@@ -52,14 +33,6 @@ function getPath(uid) {
 }
 
 /*
-    * Returns the file extension and removes the dot from extension name
-    * file = File name with extension
-*/
-function fixExtension(file) {
-    return pathJS.extname(file).substring(1, file.length);
-}
-
-/*
     * Function to sort File listing from Db (used by array.sort)
     * Priority to folders over files
     * After that sorts alphabetically
@@ -77,13 +50,44 @@ function compareDirListing(a, b) {
 }
 
 /*
-    * Returns link to a video
-    * id = Id of the video in database
+    * Returns link to a video from virtual view
+    * id = Id of the item in users_data table
 */
 
 //FIXME: implement
-function generateViewUrl(id) {
-    return '/view/' + id;
+function generateVirtualViewUrl(id) {
+    return new Promise(function(resolve, reject) {
+        models.users_data.find({where: {id: id}}).then(function (item) {
+            if(item === null) {
+                resolve("#");
+            }
+            models.items.find({where:{id: item.iid}}).then(function (realItem) {
+                if(realItem === null) {
+                    resolve("#");
+                }
+                resolve('/view/' + item.id + '/' + item.name + '.' + pathJS.extname(realItem.path));
+            });
+            
+        });
+    });
+}
+
+
+/*
+    * Returns link to a video from physical view
+    * id = Id of the item in items table
+*/
+function generatePhysicalViewUrl(id) {
+    return new Promise(function(resolve, reject) {
+        models.items.find( {where: {id: id}}).then(function (item) {
+            if(item === null) {
+                resolve("#");
+            }
+
+            resolve('/pview/' + item.id + '/' + item.name + pathJS.extname(item.path));
+            
+        });
+    });
 }
 
 /*
@@ -109,6 +113,7 @@ function generateDeletedUrl(id) {
     * Returns boolean wether item is flagged as seen by user
     * id = Id of the item in database
 */
+//TODO: remove as it is unused
 function isSeenOrDeleted(id) {
     return new Promise(function (resolve, reject) {
         if(id > 0) {
@@ -139,7 +144,7 @@ function changeItemName(id, name) {
             if(data === null) {
                 reject("id not found");
             }
-            models.users_data.update({data: name}, {where: {id: id}, limit: 1}).then(function (data) {
+            models.users_data.update({name: name}, {where: {id: id}, limit: 1}).then(function (data) {
                 resolve("name changed");  
             });
         });
@@ -154,7 +159,7 @@ function changeItemName(id, name) {
 */
 function createFolder(name, parent, uid) {
     return new Promise(function (resolve, reject) {
-        models.users_data.create({ user: uid, data: name, item: 0, seen: 0, deleted: 0, parent: parent, type: 0 }).then(function (data) {
+        models.users_data.create({ uid: uid, name: name, iid: 0, seen: 0, deleted: 0, pid: parent, type: 0 }).then(function (data) {
             resolve(true);
         }).catch(function (data) {
             reject(false);
@@ -176,7 +181,7 @@ function moveItem(id, parent, uid) {
                 reject(false);
             }
             else {
-                models.users_data.update( {parent: parent}, {where: {id: id, user: uid}, limit: 1}).then(function (data) {
+                models.users_data.update( {pid: parent}, {where: {id: id, uid: uid}, limit: 1}).then(function (data) {
                     resolve(true);    
                 }).catch(function (data) {
                     reject(false);
@@ -205,11 +210,10 @@ function getLoginType() {
     });
 }
 
-exports.getTypes = getTypes;
 exports.getPath = getPath;
-exports.fixExtension = fixExtension;
 exports.compareDirListing = compareDirListing;
-exports.generateViewUrl = generateViewUrl;
+exports.generatePhysicalViewUrl = generatePhysicalViewUrl;
+exports.generateVirtualViewUrl = generateVirtualViewUrl;
 exports.generateSeenUrl = generateSeenUrl;
 exports.generateDeletedUrl = generateDeletedUrl;
 exports.isSeenOrDeleted = isSeenOrDeleted;

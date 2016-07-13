@@ -56,6 +56,7 @@ if (app.get('env') === 'development') {
     app.locals.pretty = true;
     app.use(function (err, req, res, next) {
         res.status(err.status || 500);
+        console.log(err.message);
         res.render('error', {
             message: err.message,
             error: err

@@ -7,14 +7,13 @@ module.exports = function(sequelize, DataTypes) {
             primaryKey: true,
             type: DataTypes.INTEGER
         },
-        user: DataTypes.INTEGER,
-        item: DataTypes.INTEGER,
-        data: DataTypes.TEXT,
+        uid: DataTypes.INTEGER,
+        iid: DataTypes.INTEGER,
+        name: DataTypes.STRING,
         seen: DataTypes.INTEGER,
         deleted: DataTypes.INTEGER,
-        parent: DataTypes.INTEGER,
-        type: DataTypes.INTEGER,
-        string: DataTypes.STRING
+        pid: DataTypes.INTEGER,
+        type: DataTypes.INTEGER
 
     }, {
     classMethods: {

@@ -113,6 +113,42 @@ router.get('/view', function (req, res) {
     res.sendStatus(404);
 });
 
+//TODO: merge routes to 1
+//Type 0 - Virtual view
+//Type 1 - Physical view
+//Parent - id of the parent folder
+//Item - name of the item
+router.get('/view/:id/:name', function (req, res) {
+    //if(parseInt(req.params.type) === 0) {
+        
+        mods.view.virtualView(res, req.params.id, req.params.name, req.get('Range'));
+    /*}
+    else if(parseInt(req.params.type) === 1) {
+        mods.view.physicalView(res, req.params.parent, req.params.item, req.get('Range'));
+    }
+    else {
+        res.sendStatus(404);
+    }*/
+});
+
+router.get('/pview/:id/:name', function (req, res) {
+    mods.view.physicalView(res, req.params.id, req.params.name, req.get('Range'));
+});
+
+/*router.get('/view/:type/:parent', function (req, res) {
+    if(req.params.type === 0) {
+        mods.view.virtualDirList(res, req.params.parent);
+    }
+    else if(req.params.type === 1) {
+        mods.view.physicalDirList(res, req.params.parent);
+    }
+    else {
+        req.sendStatus(404);
+    }
+    
+});*/
+
+
 router.get('/logout', function (req, res) {
     req.session.destroy();
     res.redirect('/login');
