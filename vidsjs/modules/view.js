@@ -41,7 +41,7 @@ function returnRange(res, size) {
 function returnNoRange(res, path, size) {
     models.settings.find({ where: { name: 'packetsize' } }).then(function (psize) {
         let dbsize = parseInt(psize.value);
-        if (size > dbsize) {                                
+        if (size > dbsize) {
             let returnrange = '0-' + (dbsize - 1);
             returnData(res, path, dbsize, 0, returnrange, size);
         }
@@ -150,49 +150,35 @@ function manageMime(res, path) {
     * range  = Range of bytes to return
 */
 function virtualView(res, id, name, range) {
-    //, name: name
-    //CHECK IF FILE EXISTS
-    //CHECK IF SUBTITLE EXISTS
     let type = mime.lookup(pathJS.extname(name));
-
-    /*models.users_data.find({ where: { id: id, mime: type}}).then(function (item) {
-        if(item !== null) {
-            models.items.find({ where: {id: item.iid}}).then(function (data) {
-                if(data !== null) {
-                    manageView(res, data.path, range);
-                }
-                else {
-                    res.sendStatus(404);
-                }
-            });
+    models.physical_items_mimes.find({ where: {iid: id, mime: type} }).then(function (data) {
+        if(data !== null) {
+            manageView(res, data.path, range);
         }
-    })*/
-
-    models.users_data.find({ where: { id: id } }).then(function (item) {
-        if(item !== null) {
-            models.items.find({ where: {id: item.iid }}).then(function (data) {
-                if(data !== null) {
-                    if(type === data.mime) {
-                        manageView(res, data.path, range);
-                    }
-                    else {
-                        models.users_data.find({ where: {pid: id, mime: type}}).then(function (mimedata) {
-                            if(mimedata !== null) {
-                                manageMime(res, mimedata.path);
-                            }
-                            else {
-                                res.sendStatus(404);
+        else {
+            //searching for subtitle files
+            models.physical_items.findAll({ where: {pid: iid}}).then(function(subtitles) {
+                if(subtitles !== null) {
+                    var found = false;
+                    for(let i in subtitles) {
+                        models.physical_items_mimes.find( { where: {iid: subtitles[i].id, mime: type}}).then(function (mime) {
+                            if(mime !== null) {
+                                found = true;
+                                manageMime(subtitles[i].path);
                             }
                         });
-                        
-                    }                    
+                    }
+                    if(!found) {
+                        res.sendStatus(404);
+                    }
                 }
                 else {
                     res.sendStatus(404);
                 }
             });
+
         }
-    });  
+    });
 }
 
 /*
@@ -203,14 +189,43 @@ function virtualView(res, id, name, range) {
     * range  = Range of bytes to return
 */
 function physicalView(res, parent, name, range) {
-    models.items.find({ where: { parent: parent, name: name  } }).then(function (data) {
+    /*models.physical_items.find({ where: { pid: parent, name: name  } }).then(function (data) {
         if(data !== null) {
             manageView(res, data.path, range);
         }
         else {
             res.sendStatus(404);
         }
-    });  
+    });*/
+    let type = mime.lookup(pathJS.extname(name));
+    models.physical_items_mimes.find({ where: {iid: id, mime: type} }).then(function (data) {
+        if(data !== null) {
+            manageView(res, data.path, range);
+        }
+        else {
+            //searching for subtitle files
+            models.physical_items.findAll({ where: {pid: iid}}).then(function(subtitles) {
+                if(subtitles !== null) {
+                    var found = false;
+                    for(let i in subtitles) {
+                        models.physical_items_mimes.find( { where: {iid: subtitles[i].id, mime: type}}).then(function (mime) {
+                            if(mime !== null) {
+                                found = true;
+                                manageMime(subtitles[i].path);
+                            }
+                        });
+                    }
+                    if(!found) {
+                        res.sendStatus(404);
+                    }
+                }
+                else {
+                    res.sendStatus(404);
+                }
+            });
+
+        }
+    });
 }
 
 /*function virtualDirList(res, parent) {
@@ -238,7 +253,7 @@ function physicalView(res, parent, name, range) {
             else {
                 res.sendStatus(404);
             }
-            
+
         }
         else {
             res.sendStatus(404);

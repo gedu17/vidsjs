@@ -9,7 +9,10 @@ var SequelizeStore = require('connect-session-sequelize')(session.Store);
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
-var lc = require('./modules/loginchecker');
+var missingSettings = require('./routes/missingsettings');
+var setupRoute = require('./routes/setup');
+var view = require('./routes/view');
+var setup = require('./modules/setup');
 var app = express();
 var connect = require('connect');
 var db = require('./models');
@@ -35,11 +38,15 @@ app.use(session({
     store: new SequelizeStore({db: db.sequelize})
 }));
 
-app.all('*', lc.loginChecker);
+app.all('*', setup.checkSetup);
+app.all('*', setup.checkLogin);
 
 app.use('/', routes);
 app.use('/users', users);
 app.use('/login', login);
+app.use('/missingsettings', missingSettings);
+app.use('/setup', setupRoute);
+app.use('/view', view);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -47,6 +54,8 @@ app.use(function (req, res, next) {
     err.status = 404;
     next(err);
 });
+
+
 
 // error handlers
 

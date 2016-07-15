@@ -1,6 +1,6 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-    var users_data = sequelize.define('users_data', {
+    var users_data = sequelize.define('virtual_items', {
         id: {
             allowNull: false,
             autoIncrement: true,
@@ -9,10 +9,10 @@ module.exports = function(sequelize, DataTypes) {
         },
         uid: DataTypes.INTEGER,
         iid: DataTypes.INTEGER,
+        pid: DataTypes.INTEGER,
         name: DataTypes.STRING,
         seen: DataTypes.INTEGER,
         deleted: DataTypes.INTEGER,
-        pid: DataTypes.INTEGER,
         type: DataTypes.INTEGER
 
     }, {

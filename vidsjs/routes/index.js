@@ -6,19 +6,6 @@ var Sequelize = require('sequelize');
 var mods = require('../modules');
 var router = express.Router();
 
-function getUserDefinedName(id) {
-    //TODO: IMPLEMENT
-    return new Promise(function (resolve, reject) {
-        models.items.find({ where: { id: id } }).then(function (data) {
-            resolve(pathJS.basename(data.path));
-        }).catch(function (err) {
-            reject(err);
-        });
-    });
-    
-    
-}
-
 /* GET returns physical directory listing */
 router.get('/', function (req, res) {
     //mods.dirlist.physicalDirListing(req.session.uid).then(function (cont) {
@@ -61,23 +48,19 @@ router.get('/api/virtlist', function (req, res) {
     mods.dirlist.virtualDirListing(req.session.uid).then(function (cont) {
         res.render('virtlist_ajax', { content: cont });
     }).catch(function (err) {
-        console.log("route /api/dirlist " + err);
+        console.log("route /api/virlist " + err);
         res.sendStatus(500);
     });
 });
 
-router.get('/view/:id', function (req, res) {
-    mods.view.view(res, req.params.id, req.get('Range'));
-});
-
 router.get('/seen/:id', function (req, res) {
     mods.seen.seen(res, req.params.id);
-    
+
 });
 
 router.get('/deleted/:id', function (req, res) {
     mods.deleted.deleted(res, req.params.id);
-    
+
 });
 
 router.get('/changeItemName/:id/:name', function (req, res) {
@@ -107,30 +90,6 @@ router.get('/moveItem/:id/:parent', function (req, res) {
     });
 });
 
-/* debuging some strange requests */
-router.get('/view', function (req, res) {
-    //console.log(req);
-    res.sendStatus(404);
-});
-
-//TODO: merge routes to 1
-//Type 0 - Virtual view
-//Type 1 - Physical view
-//Parent - id of the parent folder
-//Item - name of the item
-router.get('/view/:id/:name', function (req, res) {
-    //if(parseInt(req.params.type) === 0) {
-        
-        mods.view.virtualView(res, req.params.id, req.params.name, req.get('Range'));
-    /*}
-    else if(parseInt(req.params.type) === 1) {
-        mods.view.physicalView(res, req.params.parent, req.params.item, req.get('Range'));
-    }
-    else {
-        res.sendStatus(404);
-    }*/
-});
-
 router.get('/pview/:id/:name', function (req, res) {
     mods.view.physicalView(res, req.params.id, req.params.name, req.get('Range'));
 });
@@ -145,7 +104,7 @@ router.get('/pview/:id/:name', function (req, res) {
     else {
         req.sendStatus(404);
     }
-    
+
 });*/
 
 

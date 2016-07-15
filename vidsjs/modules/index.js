@@ -7,5 +7,5 @@ exports.utils = require('./utils');
 exports.view = require('./view');
 exports.seen = require('./seen');
 exports.users = require('./users');
-exports.loginchecker = require('./loginchecker');
 exports.deleted = require('./deleted');
+exports.setup = require('./setup');

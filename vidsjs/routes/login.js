@@ -12,14 +12,14 @@ router.get('/', function (req, res) {
             }).catch(function(err) {
                 console.log(err);
             });
-        } 
+        }
         else {
             mods.users.getLogin(null).then(function(users) {
                 res.render('userlogin', {data: users});
             }).catch(function(err) {
                 console.log(err);
             });
-            
+
         }
     }).catch(function(err) {
         console.log(err);
@@ -33,13 +33,16 @@ router.get('/setuser/:id', function (req, res) {
         req.session.uid = data.id;
         req.session.name = data.name;
         req.session.level = data.level;
-        res.redirect('/');
+        //To stop race condition between writing session data and reloading page
+        setTimeout(function() {
+            res.redirect('/');
+        }, 200);
     }).catch(function (err) {
         console.log(err);
         //TODO: show proper error msg
         res.sendStatus(404);
     })
-    
+
 });
 
 /* POST user login data */

@@ -1,8 +1,7 @@
 'use strict';
-
 module.exports = {
-  up: function (queryInterface, Sequelize) {
-    return queryInterface.createTable('users_data', {
+  up: function(queryInterface, Sequelize) {
+    return queryInterface.createTable('virtual_items', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -13,9 +12,14 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER
       },
-        iid: {
-            allowNull: false,
+      iid: {
+        allowNull: false,
         type: Sequelize.INTEGER
+      },
+      pid: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       name: {
         allowNull: false,
@@ -27,11 +31,6 @@ module.exports = {
         defaultValue: 0
       },
       deleted: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        defaultValue: 0
-      },
-      pid: {
         allowNull: false,
         type: Sequelize.INTEGER,
         defaultValue: 0
@@ -51,14 +50,7 @@ module.exports = {
       }
     });
   },
-
-  down: function (queryInterface, Sequelize) {
-    /*
-      Add reverting commands here.
-      Return a promise to correctly handle asynchronicity.
-
-      Example:*/
-    	return queryInterface.dropTable('users_data');
-    
+  down: function(queryInterface, Sequelize) {
+    return queryInterface.dropTable('virtual_items');
   }
 };

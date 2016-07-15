@@ -1,6 +1,7 @@
 'use strict';
 
 var models = require('../models');
+var utils = require('./utils');
 
 /*
     * Returns link for login in passwordless mode
@@ -10,14 +11,6 @@ function getUserSetLink(id) {
     return "/login/setuser/"+id;
 }
 
-/*
-    * Hashes password
-    * password = password to be hashed
-*/
-//TODO: Implement
-function hashPassword(password) {
-    return password;
-}
 
 /*
     * Validates login information
@@ -25,13 +18,13 @@ function hashPassword(password) {
 */
 function checkLogin(data) {
     return new Promise(function (resolve, reject) {
-        models.users.find({where: {id: data.userid, password: hashPassword(data.password)}}).then(function(data) {
+        models.users.find({where: {id: data.userid, password: utils.hashPassword(data.password)}}).then(function(data) {
             if(data !== null) {
                 resolve({id: data.id, name: data.name, level: data.level});
-            }   
+            }
             else {
                 reject("Bad password.");
-            } 
+            }
         }).catch(function(err) {
             reject(err);
         });
@@ -47,10 +40,10 @@ function getUserData(id) {
         models.users.find({where: {id: id}}).then(function(data) {
             if(data !== null) {
                 resolve({id: data.id, name: data.name, level: data.level});
-            }   
+            }
             else {
                 reject("Bad user id.");
-            } 
+            }
         }).catch(function(err) {
             reject(err);
         });
@@ -68,12 +61,12 @@ function getLogin(error) {
             if(data !== null) {
                 data.map(function (obj) {
                     ret.users.push({"name": obj.name, "id": obj.id});
-                });   
+                });
                 resolve(ret);
-            }   
+            }
             else {
                 reject("No users.");
-            } 
+            }
         }).catch(function(err) {
             reject(err);
         });
@@ -91,7 +84,7 @@ function getUserList() {
                 var promiseArray = new Array();
                 var cycle = function(obj) {
                     return new Promise(function (resolve2, reject2) {
-                        models.users_data.count({where: {uid: obj.id}}).then(function (count) {
+                        models.virtual_items.count({where: {uid: obj.id}}).then(function (count) {
                             resolve2({"name": obj.name, "link": getUserSetLink(obj.id), "level": obj.level, "itemCount": count});
                         });
                     });
@@ -108,11 +101,10 @@ function getUserList() {
                     });
                     resolve(ret);
                 });
-                //resolve(ret);
-            }   
+            }
             else {
                 reject("No users");
-            } 
+            }
         }).catch(function(err) {
             reject(err);
         });

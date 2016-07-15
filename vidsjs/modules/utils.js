@@ -53,21 +53,18 @@ function compareDirListing(a, b) {
     * Returns link to a video from virtual view
     * id = Id of the item in users_data table
 */
-
-//FIXME: implement
 function generateVirtualViewUrl(id) {
     return new Promise(function(resolve, reject) {
-        models.users_data.find({where: {id: id}}).then(function (item) {
+        models.virtual_items.find({where: {id: id}}).then(function (item) {
             if(item === null) {
                 resolve("#");
             }
-            models.items.find({where:{id: item.iid}}).then(function (realItem) {
-                if(realItem === null) {
+            models.physical_items_mimes.find({where:{iid: item.iid}}).then(function (mime) {
+                if(mime === null) {
                     resolve("#");
                 }
-                resolve('/view/' + item.id + '/' + item.name + '.' + pathJS.extname(realItem.path));
+                resolve('/view/' + iid + '/' + item.name + '.' + mime.extension(mime.mime));
             });
-            
         });
     });
 }
@@ -79,13 +76,16 @@ function generateVirtualViewUrl(id) {
 */
 function generatePhysicalViewUrl(id) {
     return new Promise(function(resolve, reject) {
-        models.items.find( {where: {id: id}}).then(function (item) {
+        models.physical_items.find( {where: {id: id}}).then(function (item) {
             if(item === null) {
                 resolve("#");
             }
-
-            resolve('/pview/' + item.id + '/' + item.name + pathJS.extname(item.path));
-            
+            models.physical_items_mimes.find({where:{iid: id}}).then(function (mime) {
+                if(mime === null) {
+                    resolve("#");
+                }
+                resolve('/pview/' + id + '/' + item.name + '.' + mime.extension(mime.mime));
+            });
         });
     });
 }
@@ -117,7 +117,7 @@ function generateDeletedUrl(id) {
 function isSeenOrDeleted(id) {
     return new Promise(function (resolve, reject) {
         if(id > 0) {
-            models.users_data.find({ where: { id: id } }).then(function (par) {
+            models.virtual_items.find({ where: { id: id } }).then(function (par) {
                 if (par === null) {
                     reject(false);
                 }
@@ -140,12 +140,12 @@ function isSeenOrDeleted(id) {
 */
 function changeItemName(id, name) {
     return new Promise(function (resolve, reject) {
-        models.users_data.find({ where: {id: id}, limit: 1}).then(function (data) {
+        models.virtual_items.find({ where: {id: id}, limit: 1}).then(function (data) {
             if(data === null) {
                 reject("id not found");
             }
-            models.users_data.update({name: name}, {where: {id: id}, limit: 1}).then(function (data) {
-                resolve("name changed");  
+            models.virtual_items.update({name: name}, {where: {id: id}, limit: 1}).then(function (data) {
+                resolve("name changed");
             });
         });
     });
@@ -159,12 +159,12 @@ function changeItemName(id, name) {
 */
 function createFolder(name, parent, uid) {
     return new Promise(function (resolve, reject) {
-        models.users_data.create({ uid: uid, name: name, iid: 0, seen: 0, deleted: 0, pid: parent, type: 0 }).then(function (data) {
+        models.virtual_items.create({ uid: uid, name: name, iid: 0, seen: 0, deleted: 0, pid: parent, type: 0 }).then(function (data) {
             resolve(true);
         }).catch(function (data) {
             reject(false);
         });
-        
+
     });
 }
 
@@ -175,20 +175,20 @@ function createFolder(name, parent, uid) {
 */
 function moveItem(id, parent, uid) {
     return new Promise(function (resolve, reject) {
-        
-        models.users_data.find({where:{id: parent}}).then(function (data) {
+
+        models.virtual_items.find({where:{id: parent}}).then(function (data) {
             if((data === null || data.type != 0) && parent != 0) {
                 reject(false);
             }
             else {
-                models.users_data.update( {pid: parent}, {where: {id: id, uid: uid}, limit: 1}).then(function (data) {
-                    resolve(true);    
+                models.virtual_items.update( {pid: parent}, {where: {id: id, uid: uid}, limit: 1}).then(function (data) {
+                    resolve(true);
                 }).catch(function (data) {
                     reject(false);
                 });
             }
-            
-        });        
+
+        });
     });
 }
 
@@ -197,7 +197,7 @@ function moveItem(id, parent, uid) {
 */
 function getLoginType() {
     return new Promise(function (resolve, reject) {
-        models.settings.find({ where: { name: 'loginrequired' } }).then(function (lr) {
+        models.settings.find({ where: { name: 'loginmethod' } }).then(function (lr) {
             if (lr === null) {
                 reject("Setting not found");
             }
@@ -205,9 +205,18 @@ function getLoginType() {
                 resolve(parseInt(lr.value));
             }
         }).catch(function (err) {
-            reject("Setting login required not found: " + err);
+            reject("Setting login method not found: " + err);
         });
     });
+}
+
+/*
+    * Hashes password
+    * password = Password to hash
+*/
+//TODO: implement hash function
+function hashPassword(password) {
+    return password;
 }
 
 exports.getPath = getPath;
@@ -221,3 +230,4 @@ exports.getLoginType = getLoginType;
 exports.changeItemName = changeItemName;
 exports.createFolder = createFolder;
 exports.moveItem = moveItem;
+exports.hashPassword = hashPassword;

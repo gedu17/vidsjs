@@ -1,0 +1,27 @@
+extends layout
+
+block content
+    div.container-fluid.col-md-4.login-box
+        div.panel.panel-default
+            div.panel-heading Setup
+            div.panel-body
+                form(name="login", method="post")
+                    fieldset.form-group
+                        label(for="packetsize") Video packet size
+                        input.form-control(type='text', value='#{packetSize}' name='packetsize')#packetsize
+                    fieldset.form-group
+                        label(for="loginmethod") Use password for authentication
+                        select.form-control#loginmethod(name='loginmethod')
+                            option(value='1') Yes
+                            option(value='0') No
+                    hr
+                    fieldset.form-group
+                        label(for="username") Username
+                        input.form-control(type='text', placeholder='Username', name='username', required)#username
+                    fieldset.form-group
+                        label(for="password") Password
+                        input.form-control(type='password', placeholder='Password', name='password', required)#password
+                    fieldset.form-group
+                        label(for="password2") Repeat password
+                        input.form-control(type='password', placeholder='Password', name='password2', required)#password2
+                    button.btn.btn-primary(type="submit" class="btn btn-primary") Setup

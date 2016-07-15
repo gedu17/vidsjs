@@ -1,9 +1,8 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var users_settings = sequelize.define('users_settings', {
-    uid: DataTypes.INTEGER,
-    type: DataTypes.STRING,
-    value: DataTypes.STRING
+  var items_mimes = sequelize.define('physical_items_mimes', {
+    iid: DataTypes.INTEGER,
+    mime: DataTypes.STRING
   }, {
     classMethods: {
       associate: function(models) {
@@ -11,5 +10,5 @@ module.exports = function(sequelize, DataTypes) {
       }
     }
   });
-  return users_settings;
+  return items_mimes;
 };

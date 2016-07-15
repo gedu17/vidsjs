@@ -1,24 +1,18 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('users_data', {
+    return queryInterface.createTable('physical_items_mimes', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-        user: {
-            allowNull: false,
+      iid: {
         type: Sequelize.INTEGER
       },
-        item: {
-            allowNull: false,
-        type: Sequelize.INTEGER
-      },
-        data: {
-            allowNull: false,
-        type: Sequelize.TEXT
+      mime: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -31,6 +25,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('users_data');
+    return queryInterface.dropTable('physical_items_mimes');
   }
 };

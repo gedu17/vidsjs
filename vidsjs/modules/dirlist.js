@@ -21,8 +21,6 @@ function physicalDirListing(uid) {
                 }
 
                 resolve(data);
-                //resolve(ret);
-                //resolve(itemArray);
             }).catch(function (err) {
                 console.log("physicalDirListing = " + err);
                 reject(err);
@@ -32,7 +30,7 @@ function physicalDirListing(uid) {
             reject(err);
         });
     });
-        
+
 }
 
 //TODO: add comments
@@ -58,7 +56,7 @@ function virtualDirListing(uid) {
             reject(err);
         });*/
     });
-        
+
 }
 
 //TODO: add comments
@@ -84,7 +82,7 @@ function seenDirListing(uid) {
             reject(err);
         });*/
     });
-        
+
 }
 
 
@@ -98,15 +96,15 @@ function seenDirListing(uid) {
 function getDirListing(level, folder, upid) {
     var itemArray = { name: "parentDir", type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.items.findAll({ where: { parent: level, upid: upid },  order: 'type ASC, name ASC' }).then(function (items) {
+        models.physical_items.findAll({ where: { pid: level, upid: upid },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), id: level, seen: utils.generateSeenUrl(level) };
             }
-            
+
             /*utils.isSeen(level).then(function (tmp) {
                 reject(tmp);
-            }).catch(function (tmp) {   */             
+            }).catch(function (tmp) {   */
                 var cycleItem = function (i) {
                     return new Promise(function (resolve2, reject2) {
                         //FIXME: get user id and fix spaghetti
@@ -117,13 +115,13 @@ function getDirListing(level, folder, upid) {
                             if (items[i].type === 0) {
                                 promiseArray.push(getDirListing(items[i].id, items[i].name, upid));
                                 resolve2(true);
-                            } 
+                            }
                             else {
                                 utils.generatePhysicalViewUrl(items[i].id).then(function (viewUrl) {
                                     itemArray.items.push({ name: items[i].name, type: 1, id: items[i].id, url: viewUrl});
                                 resolve2(true);
                                 });
-                                
+
                             }
                         //});
                     });
@@ -133,7 +131,7 @@ function getDirListing(level, folder, upid) {
                 for (let i in items) {
                     cyclePromises.push(cycleItem(i));
                 }
-                
+
                 Promise.all(cyclePromises).then(function (tmp3) {
                     if (promiseArray.length > 0) {
                         Promise.all(promiseArray).then(function (data) {
@@ -158,7 +156,7 @@ function getDirListing(level, folder, upid) {
 function getDirListing2(level, folder, uid) {
     var itemArray = { name: null, type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.users_data.findAll({ where: { pid: level, uid: uid, seen: 0, deleted: 0 },  order: 'type ASC, name ASC' }).then(function (items) {
+        models.virtual_items.findAll({ where: { pid: level, uid: uid, seen: 0, deleted: 0 },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level), deleted: utils.generateDeletedUrl(level), id: level };
@@ -175,18 +173,18 @@ function getDirListing2(level, folder, uid) {
                     /*utils.isSeenOrDeleted(items[i].id).then(function (tmp2) {
                         resolve2(false);
                     }).catch(function (tmp2) {*/
-                    
+
                     if (items[i].type === 0) {
                         promiseArray.push(getDirListing2(items[i].id, items[i].name, uid));
                         resolve2(true);
-                    } 
+                    }
                     else {
                         utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
                             itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
                             deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
                             resolve2(true);
                         });
-                        
+
                     }
                     //});
                 });
@@ -196,7 +194,7 @@ function getDirListing2(level, folder, uid) {
             for (let i in items) {
                 cyclePromises.push(cycleItem(i));
             }
-            
+
             Promise.all(cyclePromises).then(function (tmp3) {
                 if (promiseArray.length > 0) {
                     Promise.all(promiseArray).then(function (data) {
@@ -221,15 +219,15 @@ function getDirListing2(level, folder, uid) {
 function getDirListing3(level, folder, uid) {
     var itemArray = { name: null, type: 0, items: Array() };
     return new Promise(function (resolve, reject) {
-        models.users_data.findAll({ where: { pid: level, uid: uid, seen: 1 },  order: 'type ASC, name ASC' }).then(function (items) {
+        models.virtual_items.findAll({ where: { pid: level, uid: uid, seen: 1 },  order: 'type ASC, name ASC' }).then(function (items) {
             let promiseArray = Array();
             if (folder !== null) {
                 itemArray = { name: folder, type: 0, items: Array(), seen: utils.generateSeenUrl(level) };
             }
-            
+
             /*utils.isSeen(level).then(function (tmp) {
                 reject(tmp);
-            }).catch(function (tmp) {     */         
+            }).catch(function (tmp) {     */
             var cycleItem = function (i) {
                 return new Promise(function (resolve2, reject2) {
                     //FIXME: get user id and fix spaghetti
@@ -240,7 +238,7 @@ function getDirListing3(level, folder, uid) {
                     if (items[i].type === 0) {
                         promiseArray.push(getDirListing3(items[i].id, items[i].name, uid));
                         resolve2(true);
-                    } 
+                    }
                     else {
                         utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
                             itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
@@ -256,7 +254,7 @@ function getDirListing3(level, folder, uid) {
             for (let i in items) {
                 cyclePromises.push(cycleItem(i));
             }
-            
+
             Promise.all(cyclePromises).then(function (tmp3) {
                 if (promiseArray.length > 0) {
                     Promise.all(promiseArray).then(function (data) {
