@@ -3,6 +3,10 @@
 ##0.3.6
 ###Back-End
 - [ ] Add support to serve subtitles with the same name as video but different extension
+- [x] Fix various bugs in generateVirtualViewUrl and generatePhysicalViewUrl 
+- [x] Fix various bugs in virtualView and PhysicalView
+- [x] Fix wrong column name in readdir
+- [ ] Add support for subtitle types: srt, ssa, ass, smi, sub, idx, mpl, vtt, psb, sami, pjs // txt?
 
 ###Front-End
 - [ ] Add modal open when opening video for view, when returned after the video to tag as seen, rate video, maybe some social buttons

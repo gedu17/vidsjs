@@ -137,7 +137,7 @@ function readDir(path, level, itemList, upid, uid, udid) {
                             itemList.removeItem({ path: newPath }).then(function (msg) {
                                 folderArray.push(readDir(newPath, parseInt(msg), itemList, upid, uid, udid));
                             }).catch(function (msg) {
-                                models.physical_items.create({ name: data[i], parent: level, type: 0, path: newPath, upid: upid }).then(function (createditem) {
+                                models.physical_items.create({ name: data[i], pid: level, type: 0, path: newPath, upid: upid }).then(function (createditem) {
                                     let newlevel = createditem.id;
 
                                     models.virtual_items.create({ uid: uid, name: data[i], iid: newlevel, seen: 0, deleted: 0, pid: udid, type: 0 })
@@ -151,7 +151,7 @@ function readDir(path, level, itemList, upid, uid, udid) {
                             if (checkType(data[i])) {
                                 itemList.removeItem({ path: newPath }).catch(function (msg) {
                                     let tmp = pathJS.parse(data[i]);
-                                    models.physical_items.create({ name: tmp.name, parent: level, type: 1, path: newPath, upid: upid }).then(function (createditem) {
+                                    models.physical_items.create({ name: tmp.name, pid: level, type: 1, path: newPath, upid: upid }).then(function (createditem) {
                                         let newlevel = createditem.id;
                                         models.virtual_items.create({ uid: uid, name: tmp.name, iid: newlevel, seen: 0, deleted: 0, pid: udid, type: 1 });
                                         models.physical_items_mimes.create({iid: newlevel, mime: mime.lookup(data[i])});

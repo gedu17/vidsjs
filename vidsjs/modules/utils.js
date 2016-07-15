@@ -3,6 +3,7 @@
 var pathJS = require('path');
 var models = require('../models');
 var os     = require('os');
+var mimeJS  = require('mime');
 
 /*
     * Fetches video directories from users_data table
@@ -63,7 +64,7 @@ function generateVirtualViewUrl(id) {
                 if(mime === null) {
                     resolve("#");
                 }
-                resolve('/view/' + iid + '/' + item.name + '.' + mime.extension(mime.mime));
+                resolve('/view/' + id + '/' + item.name + '.' + mimeJS.extension(mime.mime));
             });
         });
     });
@@ -84,7 +85,7 @@ function generatePhysicalViewUrl(id) {
                 if(mime === null) {
                     resolve("#");
                 }
-                resolve('/pview/' + id + '/' + item.name + '.' + mime.extension(mime.mime));
+                resolve('/pview/' + id + '/' + item.name + '.' + mimeJS.extension(mime.mime));
             });
         });
     });

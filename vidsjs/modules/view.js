@@ -153,11 +153,13 @@ function virtualView(res, id, name, range) {
     let type = mime.lookup(pathJS.extname(name));
     models.physical_items_mimes.find({ where: {iid: id, mime: type} }).then(function (data) {
         if(data !== null) {
-            manageView(res, data.path, range);
+            models.physical_items.find({ where: {id: id}}).then(function (item) {
+                manageView(res, item.path, range);
+            });
         }
         else {
             //searching for subtitle files
-            models.physical_items.findAll({ where: {pid: iid}}).then(function(subtitles) {
+            models.physical_items.findAll({ where: {pid: id}}).then(function(subtitles) {
                 if(subtitles !== null) {
                     var found = false;
                     for(let i in subtitles) {
@@ -184,11 +186,11 @@ function virtualView(res, id, name, range) {
 /*
     * Manages returning partial content from physical view
     * res    = Response object from expressjs
-    * parent = Parent id in items table
+    * id     = Ido of in item in table
     * name   = Name in items table
     * range  = Range of bytes to return
 */
-function physicalView(res, parent, name, range) {
+function physicalView(res, id, name, range) {
     /*models.physical_items.find({ where: { pid: parent, name: name  } }).then(function (data) {
         if(data !== null) {
             manageView(res, data.path, range);
@@ -200,7 +202,9 @@ function physicalView(res, parent, name, range) {
     let type = mime.lookup(pathJS.extname(name));
     models.physical_items_mimes.find({ where: {iid: id, mime: type} }).then(function (data) {
         if(data !== null) {
-            manageView(res, data.path, range);
+            models.physical_items.find({ where: {id: id}}).then(function (item) {
+                manageView(res, item.path, range);
+            });
         }
         else {
             //searching for subtitle files
