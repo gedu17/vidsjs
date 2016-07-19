@@ -179,7 +179,7 @@ function getDirListing2(level, folder, uid) {
                         resolve2(true);
                     }
                     else {
-                        utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
+                        utils.generateVirtualViewUrl(items[i].iid).then(function (viewUrl) {
                             itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
                             deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
                             resolve2(true);
@@ -240,7 +240,7 @@ function getDirListing3(level, folder, uid) {
                         resolve2(true);
                     }
                     else {
-                        utils.generateVirtualViewUrl(items[i].id).then(function (viewUrl) {
+                        utils.generateVirtualViewUrl(items[i].iid).then(function (viewUrl) {
                             itemArray.items.push({ name: items[i].name, type: 1, url: viewUrl, seen: utils.generateSeenUrl(items[i].id),
                             deleted: utils.generateDeletedUrl(items[i].id), id: items[i].id });
                             resolve2(true);

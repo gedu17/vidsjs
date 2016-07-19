@@ -152,7 +152,7 @@ function manageSubtitle(res, file) {
     * subtitles = All the subtitles found in physical_items table
     * Returns path to the subtitle file if found, otherwise false
 */
-function checkSubtitle(type, subtitle) {
+function checkSubtitle(type, subtitles) {
     return new Promise(function (resolve, reject) {
         var promiseArray = Array();
 

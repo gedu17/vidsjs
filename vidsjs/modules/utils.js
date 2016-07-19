@@ -56,15 +56,17 @@ function compareDirListing(a, b) {
 */
 function generateVirtualViewUrl(id) {
     return new Promise(function(resolve, reject) {
-        models.virtual_items.find({where: {id: id}}).then(function (item) {
+        models.virtual_items.find({where: {iid: id}}).then(function (item) {
             if(item === null) {
                 resolve("#");
             }
-            models.physical_items_mimes.find({where:{iid: item.iid}}).then(function (mime) {
+            models.physical_items_mimes.find({where:{iid: id}}).then(function (mime) {
                 if(mime === null) {
                     resolve("#");
                 }
-                resolve('/view/' + id + '/' + item.name + '.' + mimeJS.extension(mime.mime));
+                else {
+                    resolve('/view/' + id + '/' + item.name + '.' + mimeJS.extension(mime.mime));
+                }
             });
         });
     });

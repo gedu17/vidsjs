@@ -2,6 +2,8 @@
 
 ##0.3.7
 ###Back-End
+- [x] Fix utils generateVirtualViewUrl id bug
+- [x] Fix checkSubtitle variable mistype
 - [ ] Add all errors to system_messages
 - [ ] Add setting to add/edit/delete user directories
 - [ ] Add setting to change user password
