@@ -137,9 +137,50 @@ function manageView(res, path, range) {
     });
 }
 
-//returns mime file
-function manageMime(res, path) {
-    res.sendFile(path);
+/*
+    * Sends subtitle file to the user
+    * res  = Expressjs response object
+    * file = File to send (absolute path)
+*/
+function manageSubtitle(res, file) {
+    res.sendFile(file);
+}
+
+/*
+    * Checks wether requested subtitle file exists
+    * type      = Type to check
+    * subtitles = All the subtitles found in physical_items table
+    * Returns path to the subtitle file if found, otherwise false
+*/
+function checkSubtitle(type, subtitle) {
+    return new Promise(function (resolve, reject) {
+        var promiseArray = Array();
+
+        var cycle = function(item, type) {
+            return new Promise(function (resolve, reject) {
+                models.physical_items_mimes.find( { where: {iid: item.id, mime: type}}).then(function (mime) {
+                    if(mime !== null) {
+                        resolve({ path: item.path });
+                    }
+                    else {
+                        resolve({ path: null });
+                    }
+                });
+            });
+        };
+
+        for(let i in subtitles) {
+            promiseArray.push(cycle(subtitles[i], type));
+        }
+        Promise.all(promiseArray).then(function (data) {
+            for(let i in data) {
+                if(data[i].path !== null) {
+                    resolve(data[i].path);
+                }
+            }
+            reject(false);
+        });
+    });
 }
 
 /*
@@ -161,24 +202,17 @@ function virtualView(res, id, name, range) {
             //searching for subtitle files
             models.physical_items.findAll({ where: {pid: id}}).then(function(subtitles) {
                 if(subtitles !== null) {
-                    var found = false;
-                    for(let i in subtitles) {
-                        models.physical_items_mimes.find( { where: {iid: subtitles[i].id, mime: type}}).then(function (mime) {
-                            if(mime !== null) {
-                                found = true;
-                                manageMime(subtitles[i].path);
-                            }
-                        });
-                    }
-                    if(!found) {
+                    checkSubtitle(type, subtitles).then(function (path) {
+                        manageSubtitle(res, path);
+                    }).catch(function (notfound) {
+                        console.log("sending not found for " + notfound);
                         res.sendStatus(404);
-                    }
+                    });
                 }
                 else {
                     res.sendStatus(404);
                 }
             });
-
         }
     });
 }
@@ -191,14 +225,6 @@ function virtualView(res, id, name, range) {
     * range  = Range of bytes to return
 */
 function physicalView(res, id, name, range) {
-    /*models.physical_items.find({ where: { pid: parent, name: name  } }).then(function (data) {
-        if(data !== null) {
-            manageView(res, data.path, range);
-        }
-        else {
-            res.sendStatus(404);
-        }
-    });*/
     let type = mime.lookup(pathJS.extname(name));
     models.physical_items_mimes.find({ where: {iid: id, mime: type} }).then(function (data) {
         if(data !== null) {
@@ -208,64 +234,22 @@ function physicalView(res, id, name, range) {
         }
         else {
             //searching for subtitle files
-            models.physical_items.findAll({ where: {pid: iid}}).then(function(subtitles) {
+            models.physical_items.findAll({ where: {pid: id}}).then(function(subtitles) {
                 if(subtitles !== null) {
-                    var found = false;
-                    for(let i in subtitles) {
-                        models.physical_items_mimes.find( { where: {iid: subtitles[i].id, mime: type}}).then(function (mime) {
-                            if(mime !== null) {
-                                found = true;
-                                manageMime(subtitles[i].path);
-                            }
-                        });
-                    }
-                    if(!found) {
+                    checkSubtitle(type, subtitles).then(function (path) {
+                        manageSubtitle(res, path);
+                    }).catch(function (notfound) {
+                        console.log("sending not found for " + notfound);
                         res.sendStatus(404);
-                    }
+                    });
                 }
                 else {
                     res.sendStatus(404);
                 }
             });
-
         }
     });
 }
 
-/*function virtualDirList(res, parent) {
-    models.users_data.find({ where: { pid: parent} }).then(function (item) {
-        if(item !== null) {
-            if(item.subrip === 1) {
-                models.items.find({ where: {id: item.iid}}).then(function (data) {
-                    if(data !== null) {
-                        let ret = {};
-
-                        ret.folder.name = '/view/0/' + parent;
-                        ret.item.srt.link = '/srt/0/' + parent + '/' + item.name + '.' + mime.extension('application/x-subrip');
-                        ret.item.srt.name = item.name + '.' + mime.extension('application/x-subrip');
-                        //TODO: get statsync
-                        ret.item.srt.size = 10;
-                        ret.item.file.link = '/view/0/' + parent + '/' + item.name + '.' + mime.extension(data.path);
-                        ret.item.srt.name = '';
-                        ret.item.srt.size = '';
-                    }
-                    else {
-                        res.sendStatus(404);
-                    }
-                });
-            }
-            else {
-                res.sendStatus(404);
-            }
-
-        }
-        else {
-            res.sendStatus(404);
-        }
-    });
-}*/
-
 exports.virtualView = virtualView;
 exports.physicalView = physicalView;
-//exports.virtualDirList = virtualDirList;
-//exports.physicalDirList = physicalDirList;

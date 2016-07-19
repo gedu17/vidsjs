@@ -220,6 +220,38 @@ function hashPassword(password) {
     return password;
 }
 
+/*
+    * Sets user data in session
+    * req   = Expressjs request object
+    * id    = Id to set
+    * name  = Name to set
+    * level = Level to set
+*/
+function setUser(req, id, name, level) {
+    return new Promise(function(resolve, reject) {
+        if(typeof req.session.uid  !== "undefined") {
+            console.log("User id already set!");
+            reject(false);
+        }
+        else if(typeof req.session.name  !== "undefined") {
+            console.log("Name already set!");
+            reject(false);
+        }
+        else if(typeof req.session.level  !== "undefined") {
+            console.log("Level already set!");
+            reject(false);
+        }
+        else {
+            req.session.uid = id;
+            req.session.name = name;
+            req.session.level = level;
+            resolve(true);
+        }
+        
+    });
+    
+}
+
 exports.getPath = getPath;
 exports.compareDirListing = compareDirListing;
 exports.generatePhysicalViewUrl = generatePhysicalViewUrl;
@@ -232,3 +264,4 @@ exports.changeItemName = changeItemName;
 exports.createFolder = createFolder;
 exports.moveItem = moveItem;
 exports.hashPassword = hashPassword;
+exports.setUser = setUser;

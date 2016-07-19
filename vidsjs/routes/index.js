@@ -107,7 +107,6 @@ router.get('/pview/:id/:name', function (req, res) {
 
 });*/
 
-
 router.get('/logout', function (req, res) {
     req.session.destroy();
     res.redirect('/login');

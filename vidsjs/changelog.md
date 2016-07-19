@@ -1,15 +1,27 @@
 #VidsJS
 
-##0.3.6
+##0.3.7
 ###Back-End
-- [ ] Add support to serve subtitles with the same name as video but different extension
-- [x] Fix various bugs in generateVirtualViewUrl and generatePhysicalViewUrl 
-- [x] Fix various bugs in virtualView and PhysicalView
-- [x] Fix wrong column name in readdir
-- [ ] Add support for subtitle types: srt, ssa, ass, smi, sub, idx, mpl, vtt, psb, sami, pjs // txt?
+- [ ] Add all errors to system_messages
+- [ ] Add setting to add/edit/delete user directories
+- [ ] Add setting to change user password
+- [ ] Add setting to disable password checking
+- [ ] Add setting to create user
+- [ ] Add messages to system_messages when deleting or adding items
+
 
 ###Front-End
 - [ ] Add modal open when opening video for view, when returned after the video to tag as seen, rate video, maybe some social buttons
+- [ ] Add settings page
+- [ ] Validate input from front-end script (folder name etc)
+
+##0.3.6
+###Back-End
+- [x] Add support to serve subtitles with the same name as video but different extension
+- [x] Fix various bugs in generateVirtualViewUrl and generatePhysicalViewUrl 
+- [x] Fix various bugs in virtualView and PhysicalView
+- [x] Fix wrong column name in readdir
+- [x] Add support for subtitle types: srt, ssa, ass, smi, sub, idx, mpl, vtt, psb, sami, pjs
 
 ##0.3.5
 ###Back-End

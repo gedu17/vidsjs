@@ -30,13 +30,15 @@ router.get('/', function (req, res) {
 /* GET user passwordless login  */
 router.get('/setuser/:id', function (req, res) {
     mods.users.getUserData(req.params.id).then(function (data) {
-        req.session.uid = data.id;
+        /*req.session.uid = data.id;
         req.session.name = data.name;
         req.session.level = data.level;
         //To stop race condition between writing session data and reloading page
-        setTimeout(function() {
+        setTimeout(function() {*/
+        mods.utils.setUser(req, data.id, data.name, data.level).then(function (data) {
             res.redirect('/');
-        }, 200);
+        });
+        //}, 200);
     }).catch(function (err) {
         console.log(err);
         //TODO: show proper error msg
@@ -48,10 +50,13 @@ router.get('/setuser/:id', function (req, res) {
 /* POST user login data */
 router.post('/', function(req, res) {
     mods.users.checkLogin(req.body).then(function(data) {
-        req.session.uid = data.id;
-        req.session.name = data.name;
-        req.session.level = data.level;
-        res.redirect('/');
+        mods.utils.setUser(req, data.id, data.name, data.level).then(function () {
+            res.redirect('/');
+        })
+        //req.session.uid = data.id;
+        //req.session.name = data.name;
+        //req.session.level = data.level;
+        
     }).catch(function(err) {
         mods.users.getLogin(err).then(function(users) {
             res.render('userlogin', {data: users});
